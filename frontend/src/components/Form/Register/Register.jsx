@@ -39,7 +39,7 @@ export default function Register() {
   const onSubmitHandler = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:8001/users", {
+      const response = await fetch("http://localhost:8006/users", {
         method: "POST",
         headers: {
           "Content-type": "application/json",

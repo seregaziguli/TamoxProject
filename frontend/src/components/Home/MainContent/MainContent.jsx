@@ -14,7 +14,7 @@ export default function MainContent() {
     async function fetchOrders() {
       try {
         const auth_token = localStorage.getItem("access_token");
-        const response = await axios.get("http://localhost:8002/orders/all", {
+        const response = await axios.get("http://localhost:8007/orders/all", {
           headers: {
             "Content-Type": "application/json",
             "access-token": auth_token,
@@ -35,7 +35,7 @@ export default function MainContent() {
     try {
       const auth_token = localStorage.getItem("access_token");
       const response = await axios.post(
-        `http://localhost:8002/orders/${orderId}/process`,
+        `http://localhost:8007/orders/${orderId}/process`,
         {},
         {
           headers: {

@@ -118,7 +118,7 @@ services:
     networks:
       - app_network
     ports:
-      - "5435:5432"
+      - "5439:5432"
     volumes:
       - order_db_data:/var/lib/postgresql/data
     environment:

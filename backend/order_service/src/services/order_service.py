@@ -85,7 +85,7 @@ class OrderService:
     async def get_order_by_id(self, order_id: int, user: dict) -> OrderResponse:
         order = await self.order_repository.get_order_by_id(order_id)
         if not order or order.user_id != user["id"]:
-            return None
+            raise HTTPException(status_code=404, detail="Order not found or access denied")
         
         return OrderResponse(
             id=order.id,

@@ -21,18 +21,13 @@ export default function OrderForm() {
     const orderData = {
       description: orderForm.description,
       service_type_name: orderForm.serviceTypeName, 
-      address: {
-        street: orderForm.street,
-        city: orderForm.city,
-        zip_code: orderForm.zipCode,
-      },
       scheduled_date: new Date(orderForm.scheduledDate).toISOString(),
     };
 
     try {
       const auth_token = localStorage.getItem("access_token");
       const response = await axios.post(
-        "http://localhost:8002/orders",
+        "http://localhost:8007/orders",
         orderData,
         {
           headers: {
@@ -70,30 +65,6 @@ export default function OrderForm() {
             className="block text-sm py-2 px-4 tracking-wider w-72 font-normal rounded-lg border outline-none"
             value={orderForm.serviceTypeName}
             onChange={(e) => onChangeForm("serviceTypeName", e)}
-          ></input>
-
-          <input
-            type="text"
-            placeholder="Street"
-            className="block text-sm py-2 px-4 tracking-wider w-72 font-normal rounded-lg border outline-none"
-            value={orderForm.street}
-            onChange={(e) => onChangeForm("street", e)}
-          ></input>
-
-          <input
-            type="text"
-            placeholder="City"
-            className="block text-sm py-2 px-4 tracking-wider w-72 font-normal rounded-lg border outline-none"
-            value={orderForm.city}
-            onChange={(e) => onChangeForm("city", e)}
-          ></input>
-
-          <input
-            type="text"
-            placeholder="Zip Code"
-            className="block text-sm py-2 px-4 tracking-wider w-72 font-normal rounded-lg border outline-none"
-            value={orderForm.zipCode}
-            onChange={(e) => onChangeForm("zipCode", e)}
           ></input>
 
           <input

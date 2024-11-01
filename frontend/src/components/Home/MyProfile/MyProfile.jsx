@@ -14,7 +14,7 @@ export default function MyProfile() {
     async function fetchOrders() {
       try {
         const auth_token = localStorage.getItem("access_token");
-        const response = await axios.get("http://localhost:8002/orders", {
+        const response = await axios.get("http://localhost:8007/orders", {
           headers: {
             "Content-Type": "application/json",
             "access-token": auth_token,

@@ -24,6 +24,12 @@ class OrderRepository:
     async def get_order(self, order_id: int) -> Order:
         return await Order.get_order(self.db, order_id)
     
+    async def get_order_by_id(self, order_id: int) -> Order:
+        stmt = select(Order).where(Order.id == order_id)
+        result = await self.db.execute(stmt)
+        order = result.scalar_one_or_none()
+        return order
+    
     async def update_order(self, order_id: int, order_data: dict) -> None:
         stmt = (
             update(Order)

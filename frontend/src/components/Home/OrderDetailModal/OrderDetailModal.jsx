@@ -7,7 +7,6 @@ export default function OrderDetailModal({ order, onClose }) {
         <h2 className="text-2xl mb-4">Order Details</h2>
         <p><strong>Description:</strong> {order.description}</p>
         <p><strong>Service Type:</strong> {order.service_type_name}</p>
-        <p><strong>Address:</strong> {order.address.street}, {order.address.city}, {order.address.zip_code}</p>
         <p><strong>Scheduled Date:</strong> {new Date(order.scheduled_date).toLocaleString()}</p>
         <p><strong>Status:</strong> {order.status}</p>
 

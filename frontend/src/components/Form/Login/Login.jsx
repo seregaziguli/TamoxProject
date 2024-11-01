@@ -56,7 +56,7 @@ export default function Login() {
     }
   }, [isAuthenticated, navigate])
 
-  const API_URL = "http://localhost:8000";
+  const API_URL = "http://localhost:8005";
 
   const apiClient = axios.create({
     withCredentials: true,

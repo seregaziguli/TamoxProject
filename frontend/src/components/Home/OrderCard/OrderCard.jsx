@@ -5,7 +5,6 @@ export default function OrderCard({ order, onProcess, onOpenModal }) {
     <div className="order-card p-4 bg-gray-200 rounded-lg">
       <h2 className="text-xl font-bold">{order.description}</h2>
       <p>Service Type: {order.service_type_name}</p>
-      <p>Address: {order.address.street}, {order.address.city}, {order.address.zip_code}</p>
       <p>Scheduled Date: {new Date(order.scheduled_date).toLocaleString()}</p>
       <p>Status: {order.status}</p>
       <div className="flex justify-between mt-2">
