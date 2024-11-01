@@ -3,6 +3,11 @@ from fastapi import HTTPException
 from src.repositories.user_repository import UserRepository
 from src.api.schemas.user import RegisterUserRequest
 from src.core.security import hash_password
+import httpx
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('socketio')
 
 class UserService:
     def __init__(self, session: AsyncSession):
@@ -21,4 +26,18 @@ class UserService:
             phone_number=data.phone_number,
             hashed_password=hashed_password
         )
+        
+        async with httpx.AsyncClient() as client:
+            auth_data = {
+                "name": data.name,
+                "email": data.email,
+                "password": data.password,
+                "phone_number": data.phone_number
+            }
+            response = await client.post("http://auth_service:8000/users", json=auth_data)
+            logger.info(f"Response from auth service: {response.status_code}")
+            
+            if response.status_code != 201:
+                raise HTTPException(status_code=response.status_code, detail="Failed to create account")
+        
         return new_user

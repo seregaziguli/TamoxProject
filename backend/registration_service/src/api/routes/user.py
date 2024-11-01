@@ -13,8 +13,9 @@ user_router = APIRouter(
 
 @user_router.post("", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
 async def register_user(data: RegisterUserRequest, session: AsyncSession = Depends(get_async_session)):
+    user_service = UserService(session)
     try:
-        new_user = await user_utils.create_user_account(data, session)
+        new_user = await user_service.register_user(data)
         return UserResponse(**new_user.to_dict())  
     except HTTPException as http_exc:
         raise http_exc
