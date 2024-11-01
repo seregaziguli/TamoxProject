@@ -1,0 +1,24 @@
+.my-profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.order-select {
+  margin-bottom: 20px;
+}
+
+.order-details {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+.order-details h2 {
+  margin-bottom: 10px;
+}
+
+.order-details p {
+  margin: 5px 0;
+}

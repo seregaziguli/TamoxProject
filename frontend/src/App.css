@@ -1,0 +1,28 @@
+.modal-overlay {
+  animation: fadeIn 0.5s;
+}
+
+.order-btn {
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.order-btn:hover {
+  transform: translateY(-2px); 
+}
+
+.orders-list {
+  overflow-y: auto;
+  max-height: 80vh; 
+  transition: max-height 0.5s ease;
+  width: 95%;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
