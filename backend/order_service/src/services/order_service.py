@@ -39,20 +39,24 @@ class OrderService:
             logger.error("Failed to create order: %s", e)
             raise HTTPException(status_code=500, detail="An error occurred while creating the order")
         
-    async def update_order(self, order_id: int, order_data: dict, user: dict) -> dict:
+    async def update_order(self, order_id: int, order_data: dict, user: dict) -> OrderResponse:
         order = await self.order_repository.get_order_by_id(order_id)
         if not order or order.user_id != user['id']:
             raise HTTPException(status_code=403, detail="You don't have permission to update this order.")
 
         if 'status' in order_data:
             order.status = order_data['status']
-        if 'assigned_provider' in order_data:
-            order.assigned_provider = order_data['assigned_provider']
         if 'scheduled_date' in order_data:
             order.scheduled_date = order_data['scheduled_date']
 
         await self.order_repository.update_order(order_id, order_data)
-        return order
+        return OrderResponse(
+            id=order.id,
+            description=order.description,
+            service_type_name=order.service_type_name,
+            scheduled_date=order.scheduled_date,
+            status=order.status.value
+        )
         
     async def get_user_orders(self, user: dict) -> List[OrderResponse]:
         orders = await self.order_repository.get_user_orders(user["id"])
@@ -99,12 +103,12 @@ class OrderService:
         order = await self.order_repository.get_order_by_id(order_id)
 
         if not order or order.user_id != user["id"]:
-            return None
+            raise HTTPException(status_code=403, detail="Access denied to process this order.")
 
         logger.info(f"Processing order {order.id} with status {order.status}")
 
         if order.status != OrderStatus.NEW:
-            raise ValueError(f"Order cannot be processed. Current status: {order.status}")
+            raise HTTPException(status_code=400, detail=f"Order cannot be processed. Current status: {order.status}")
 
         order.status = OrderStatus.COMPLETED
 
@@ -115,5 +119,5 @@ class OrderService:
             description=order.description,
             service_type_name=order.service_type_name,
             scheduled_date=order.scheduled_date,
-            status=order.status.value
+            status=order.status
         )

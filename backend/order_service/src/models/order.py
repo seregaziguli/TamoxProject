@@ -12,6 +12,24 @@ class OrderStatus(enum.Enum):
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
 
+class OrderAssignmentStatus(enum.Enum):
+    PENGIND = "PENGING"
+    IN_PROGRESS = "IN PROGRESS"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+
+class OrderAssignment(Base):
+    __tablename__ = "order_assignments"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
+    provider_id = Column(Integer, nullable=False)
+    satus = Column(Enum(OrderAssignmentStatus), default=OrderAssignmentStatus.PENGIND, nullable=False)
+    completion_date = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+    order = relationship("Order", back_populates="assignments")
+
 class Order(Base):
     __tablename__ = "orders"
     
@@ -21,8 +39,9 @@ class Order(Base):
     scheduled_date = Column(DateTime, nullable=False)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     status = Column(Enum(OrderStatus), default=OrderStatus.NEW, nullable=False)
-    assigned_provider_id = Column(Integer, nullable=True)
     service_type_name = Column(String, nullable=True)
+
+    assignments = relationship("OrderAssignment", back_populates="order")
 
     @classmethod
     async def get_order(cls, session: AsyncSession, order_id: int):

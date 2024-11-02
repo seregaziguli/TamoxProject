@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from src.models.order import Order, OrderStatus
+from src.models.order import Order, OrderStatus, OrderAssignment, OrderAssignmentStatus
 from src.db.session import metadata
 from src.config_env import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER
 

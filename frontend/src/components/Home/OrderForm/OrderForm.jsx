@@ -5,9 +5,6 @@ export default function OrderForm() {
   const [orderForm, setOrderForm] = useState({
     description: "",
     serviceTypeName: "",
-    street: "",
-    city: "",
-    zipCode: "",
     scheduledDate: "",
   });
 

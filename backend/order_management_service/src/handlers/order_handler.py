@@ -11,20 +11,18 @@ async def handle_order_message(order_info: str) -> None:
         order_data = json.loads(order_info)
         order_id = order_data.get("order_id")
         new_status = order_data.get("new_status")
-        assigned_provider = order_data.get("assigned_provider")
         new_scheduled_date = order_data.get("scheduled_date")
 
         if not order_id:
             logger.error("Order id not found in message. Message: %s", order_data)
             return
-      
+
         async with httpx.AsyncClient() as client:
             update_data = {
                 "status": new_status,
-                "assigned_provider": assigned_provider,
                 "scheduled_date": new_scheduled_date
             }
-            update_data = {k: v for k, v in update_data.items() if v is not None}  
+            update_data = {k: v for k, v in update_data.items() if v is not None}
 
             if update_data:
                 response = await client.put(f"http://order_service:8002/orders/{order_id}", json=update_data)
@@ -32,6 +30,14 @@ async def handle_order_message(order_info: str) -> None:
                     logger.info("Order update with ID %s completed successfully.", order_id)
                 else:
                     logger.error("Failed to update order with ID %s. Response status: %s", order_id, response.status_code)
+
+            check_response = await client.get(f"http://order_service:8002/orders/{order_id}/process")
+            if check_response.status_code == 200:
+                check_data = check_response.json()
+                if check_data.get("status") == "COMPLETED":
+                    logger.info("Order with ID %s marked as COMPLETED.", order_id)
+            else:
+                logger.error("Failed to check completion status for order ID %s", order_id)
 
     except json.JSONDecodeError:
         logger.error("Incorrect format JSON: %s", order_info)

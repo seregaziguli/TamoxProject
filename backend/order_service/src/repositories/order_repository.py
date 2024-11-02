@@ -2,12 +2,11 @@ from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from src.models.order import Order
-from src.models.order import OrderStatus
 from typing import List
 import logging
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('socketio')
+logger = logging.getLogger('order_repository')
 
 class OrderRepository:
     def __init__(self, db: AsyncSession):
@@ -20,9 +19,6 @@ class OrderRepository:
         await self.db.refresh(new_order)
 
         return new_order
-    
-    async def get_order(self, order_id: int) -> Order:
-        return await Order.get_order(self.db, order_id)
     
     async def get_order_by_id(self, order_id: int) -> Order:
         stmt = select(Order).where(Order.id == order_id)
