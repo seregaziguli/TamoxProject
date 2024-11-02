@@ -4,6 +4,7 @@ from sqlalchemy.future import select
 from src.models.order import Order
 from typing import List
 import logging
+from src.models.order import OrderAssignment
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('order_repository')
@@ -35,6 +36,24 @@ class OrderRepository:
         )
         await self.db.execute(stmt)
         await self.db.commit()
+
+    async def create_assignment(self, assignment_data: dict) -> OrderAssignment:
+        new_assignment = OrderAssignment(**assignment_data)
+        self.db.add(new_assignment)
+        await self.db.commit()
+        await self.db.refresh(new_assignment)
+
+        return new_assignment
+
+    async def get_assignment_for_order(self, order_id: int) -> List[OrderAssignment]:
+        stmt = select(OrderAssignment).where(OrderAssignment.order_id == order_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+    
+    async def get_assignments_for_order(self, order_id: int) -> List[OrderAssignment]:
+        stmt = select(OrderAssignment).where(OrderAssignment.order_id == order_id)
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
     
     async def get_user_orders(self, user_id: int) -> List[Order]:
         stmt = select(Order).filter_by(user_id=user_id)

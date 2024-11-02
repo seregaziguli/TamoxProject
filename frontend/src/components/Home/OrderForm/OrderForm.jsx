@@ -6,6 +6,7 @@ export default function OrderForm() {
     description: "",
     serviceTypeName: "",
     scheduledDate: "",
+    assignmentPolicy: "MULTIPLE",
   });
 
   const onChangeForm = (label, event) => {
@@ -17,8 +18,9 @@ export default function OrderForm() {
 
     const orderData = {
       description: orderForm.description,
-      service_type_name: orderForm.serviceTypeName, 
+      service_type_name: orderForm.serviceTypeName,
       scheduled_date: new Date(orderForm.scheduledDate).toISOString(),
+      assignment_policy: orderForm.assignmentPolicy, 
     };
 
     try {
@@ -36,7 +38,7 @@ export default function OrderForm() {
       console.log("Order created successfully:", response.data);
     } catch (error) {
       console.error(
-        "Error creating order:", 
+        "Error creating order:",
         error.response ? error.response.data : error
       );
     }
@@ -71,6 +73,15 @@ export default function OrderForm() {
             value={orderForm.scheduledDate}
             onChange={(e) => onChangeForm("scheduledDate", e)}
           ></input>
+
+          <select
+            value={orderForm.assignmentPolicy}
+            onChange={(e) => onChangeForm("assignmentPolicy", e)}
+            className="block text-sm py-2 px-4 tracking-wider w-72 font-normal rounded-lg border outline-none"
+          >
+            <option value="MULTIPLE">Multiple</option>
+            <option value="EXCLUSIVE">Exclusive</option>
+          </select>
 
           <button
             className="order-btn text-xl hover:bg-blue-600 text-white bg-blue-500 px-4 py-2 rounded-lg mt-5"

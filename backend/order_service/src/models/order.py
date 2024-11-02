@@ -24,11 +24,15 @@ class OrderAssignment(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
     provider_id = Column(Integer, nullable=False)
-    satus = Column(Enum(OrderAssignmentStatus), default=OrderAssignmentStatus.PENGIND, nullable=False)
+    status = Column(Enum(OrderAssignmentStatus), default=OrderAssignmentStatus.PENGIND, nullable=False)
     completion_date = Column(DateTime, nullable=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
     order = relationship("Order", back_populates="assignments")
+
+class OrderAssignmentPolicy(enum.Enum):
+    EXCLUSIVE = "EXCLUSIVE"
+    MULTIPLE = "MULTIPLE"
 
 class Order(Base):
     __tablename__ = "orders"
@@ -40,6 +44,7 @@ class Order(Base):
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     status = Column(Enum(OrderStatus), default=OrderStatus.NEW, nullable=False)
     service_type_name = Column(String, nullable=True)
+    assignment_policy = Column(Enum(OrderAssignmentPolicy), default=OrderAssignmentPolicy.MULTIPLE, nullable=False)
 
     assignments = relationship("OrderAssignment", back_populates="order")
 

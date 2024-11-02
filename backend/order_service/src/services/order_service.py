@@ -1,11 +1,15 @@
 from datetime import datetime, timezone
+import src.api.routes
 from src.repositories.order_repository import OrderRepository
 from src.api.schemas.order import OrderRequest, OrderResponse
-from src.models.order import OrderStatus
+import src.models.order
 from typing import List
 import logging
 from fastapi.exceptions import HTTPException
 from src.utils.logger import logger
+from src.models.order import OrderAssignment, OrderAssignmentStatus, OrderStatus
+from src.models.order import OrderAssignmentPolicy
+
 
 class OrderService:
     def __init__(self, order_repository: OrderRepository):
@@ -21,7 +25,8 @@ class OrderService:
                 "description": order.description,
                 "service_type_name": order.service_type_name,
                 "scheduled_date": scheduled_date_naive,
-                "status": OrderStatus.NEW.value
+                "status": OrderStatus.NEW.value,
+                "assignment_policy": order.assignment_policy.value
             }
             new_order = await self.order_repository.create_order(order_data)
             
@@ -57,6 +62,32 @@ class OrderService:
             scheduled_date=order.scheduled_date,
             status=order.status.value
         )
+    
+    async def assign_order(self, order_id: int, provider_id: int) -> OrderAssignment:
+        order = await self.order_repository.get_order_by_id(order_id)
+
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found.")
+
+        if order.assignment_policy == OrderAssignmentPolicy.EXCLUSIVE:
+            existing_assignment = await self.order_repository.get_assignment_for_order(order_id)
+            if existing_assignment:
+                raise HTTPException(status_code=400, detail="This order is exclusive and already assigned to another user.")
+        elif order.assignment_policy == OrderAssignmentPolicy.MULTIPLE:
+            existing_assignments = await self.order_repository.get_assignments_for_order(order_id)
+            existing_executors = [assignment.provider_id for assignment in existing_assignments]
+            if provider_id in existing_executors:
+                raise HTTPException(status_code=400, detail="User is already executing this order.")
+
+        assignment_data = {
+            "order_id": order.id,
+            "provider_id": provider_id,
+            "status": OrderAssignmentStatus.PENGIND, 
+            "completion_date": None 
+        }
+        
+        assignment = await self.order_repository.create_assignment(assignment_data)
+        return assignment
         
     async def get_user_orders(self, user: dict) -> List[OrderResponse]:
         orders = await self.order_repository.get_user_orders(user["id"])
@@ -121,3 +152,4 @@ class OrderService:
             scheduled_date=order.scheduled_date,
             status=order.status
         )
+    
