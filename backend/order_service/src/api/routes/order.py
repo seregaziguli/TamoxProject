@@ -20,6 +20,7 @@ async def create_order(
 ):
     try:
         new_order = await order_service.create_order(order, user)
+        logger.info("In function 1")
         return new_order
     except HTTPException as http_exc:
         logger.error(f"Exc 1: {http_exc}")
@@ -83,6 +84,7 @@ async def process_order(
         order = await order_service.process_order(order_id, user)
         if not order:
             raise HTTPException(status_code=404, detail="Order not found or cannot be processed.")
+        logger.info("In function 2")
         return order
     except HTTPException as e:
         logging.error(f"Error processing order: {e}")
@@ -102,6 +104,7 @@ async def update_order(
         updated_order = await order_service.update_order(order_id, order_data, user)
         if not updated_order:
             raise HTTPException(status_code=404, detail="Order not found.")
+        logger.info("In function 3")
         return updated_order
     except HTTPException as e:
         logger.error(f"Error updating order: {e}")
@@ -109,3 +112,19 @@ async def update_order(
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="Could not update order.")
+    
+@order_router.post("/{order_id}/confirm_completion", status_code=status.HTTP_200_OK)
+async def confirm_order_completion(
+    order_id: int,
+    user: dict = Depends(get_current_user),
+    order_service: OrderService = Depends(get_order_service)
+):
+    try:
+        confirmed_order = await order_service.confirm_order_completion(order_id, user)
+        logger.info("In function 4")
+        return confirmed_order
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception as exc:
+        logger.error(f"Error confirmed order completion: {exc}")
+        raise HTTPException(status_code=500, detail="Could not confirm order completion.")

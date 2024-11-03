@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, func, ForeignKey, Enum, Text
+from sqlalchemy import Column, Integer, String, DateTime, func, ForeignKey, Enum, Text, Boolean
 from sqlalchemy.orm import relationship
 from src.db.session import Base
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,7 +13,7 @@ class OrderStatus(enum.Enum):
     CANCELLED = "CANCELLED"
 
 class OrderAssignmentStatus(enum.Enum):
-    PENGIND = "PENGING"
+    PENDIND = "PENDING"
     IN_PROGRESS = "IN PROGRESS"
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
@@ -24,9 +24,10 @@ class OrderAssignment(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
     provider_id = Column(Integer, nullable=False)
-    status = Column(Enum(OrderAssignmentStatus), default=OrderAssignmentStatus.PENGIND, nullable=False)
+    status = Column(Enum(OrderAssignmentStatus), default=OrderAssignmentStatus.PENDIND, nullable=False)
     completion_date = Column(DateTime, nullable=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    is_confirmed = Column(Boolean, default=False)
 
     order = relationship("Order", back_populates="assignments")
 

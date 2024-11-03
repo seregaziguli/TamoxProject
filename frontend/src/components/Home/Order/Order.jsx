@@ -5,9 +5,6 @@ export default function Order() {
   const [orderForm, setOrderForm] = useState({
     description: "",
     serviceTypeName: "",
-    street: "",
-    city: "",
-    zipCode: "",
     scheduledDate: "",
   });
 
@@ -21,11 +18,6 @@ export default function Order() {
     const orderData = {
       description: orderForm.description,
       service_type_name: orderForm.serviceTypeName, 
-      address: {
-        street: orderForm.street,
-        city: orderForm.city,
-        zip_code: orderForm.zipCode,
-      },
       scheduled_date: new Date(orderForm.scheduledDate).toISOString(), 
     };
 

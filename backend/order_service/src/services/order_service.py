@@ -1,10 +1,9 @@
 from datetime import datetime, timezone
-import src.api.routes
+import fastapi
 from src.repositories.order_repository import OrderRepository
 from src.api.schemas.order import OrderRequest, OrderResponse
 import src.models.order
 from typing import List
-import logging
 from fastapi.exceptions import HTTPException
 from src.utils.logger import logger
 from src.models.order import OrderAssignment, OrderAssignmentStatus, OrderStatus
@@ -42,7 +41,7 @@ class OrderService:
             
         except Exception as e:
             logger.error("Failed to create order: %s", e)
-            raise HTTPException(status_code=500, detail="An error occurred while creating the order")
+            raise HTTPException(status_code=500, detail="An error occurred while creating the order.")
         
     async def update_order(self, order_id: int, order_data: dict, user: dict) -> OrderResponse:
         order = await self.order_repository.get_order_by_id(order_id)
@@ -68,25 +67,19 @@ class OrderService:
 
         if not order:
             raise HTTPException(status_code=404, detail="Order not found.")
-
-        if order.assignment_policy == OrderAssignmentPolicy.EXCLUSIVE:
-            existing_assignment = await self.order_repository.get_assignment_for_order(order_id)
-            if existing_assignment:
-                raise HTTPException(status_code=400, detail="This order is exclusive and already assigned to another user.")
-        elif order.assignment_policy == OrderAssignmentPolicy.MULTIPLE:
-            existing_assignments = await self.order_repository.get_assignments_for_order(order_id)
-            existing_executors = [assignment.provider_id for assignment in existing_assignments]
-            if provider_id in existing_executors:
-                raise HTTPException(status_code=400, detail="User is already executing this order.")
-
+        
+        if order.status == OrderStatus.COMPLETED:
+            raise HTTPException(status_code=400, detail="Order is already completed and cannot be reassigned.")
+        
         assignment_data = {
             "order_id": order.id,
             "provider_id": provider_id,
-            "status": OrderAssignmentStatus.PENGIND, 
-            "completion_date": None 
+            "status": OrderAssignmentStatus.PENDIND,
+            "completion_date": None
         }
-        
+
         assignment = await self.order_repository.create_assignment(assignment_data)
+        logger.debug(f"Creating assignment {assignment} with data {assignment_data}")
         return assignment
         
     async def get_user_orders(self, user: dict) -> List[OrderResponse]:
@@ -120,7 +113,7 @@ class OrderService:
     async def get_order_by_id(self, order_id: int, user: dict) -> OrderResponse:
         order = await self.order_repository.get_order_by_id(order_id)
         if not order or order.user_id != user["id"]:
-            raise HTTPException(status_code=404, detail="Order not found or access denied")
+            raise HTTPException(status_code=404, detail="Order not found or access denied.")
         
         return OrderResponse(
             id=order.id,
@@ -133,23 +126,36 @@ class OrderService:
     async def process_order(self, order_id: int, user: dict) -> OrderResponse:
         order = await self.order_repository.get_order_by_id(order_id)
 
-        if not order or order.user_id != user["id"]:
-            raise HTTPException(status_code=403, detail="Access denied to process this order.")
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found or access denied.")
 
-        logger.info(f"Processing order {order.id} with status {order.status}")
-
-        if order.status != OrderStatus.NEW:
-            raise HTTPException(status_code=400, detail=f"Order cannot be processed. Current status: {order.status}")
-
-        order.status = OrderStatus.COMPLETED
-
-        await self.order_repository.update_order(order_id, {"status": order.status})
+        if order.assignment_policy == OrderAssignmentPolicy.MULTIPLE:
+            assignments = await self.order_repository.get_assignments_for_order(order_id)
+            
+            if all(assignment.status == OrderAssignmentStatus.COMPLETED for assignment in assignments):
+                order.status = OrderStatus.COMPLETED
+                await self.order_repository.update_order(order_id, {"status": order.status})
+            else:
+                raise HTTPException(status_code=400, detail="Order is not yet fully completed by all providers.")
 
         return OrderResponse(
             id=order.id,
             description=order.description,
             service_type_name=order.service_type_name,
             scheduled_date=order.scheduled_date,
-            status=order.status
+            status=order.status.value
         )
     
+    async def confirm_order_completion(self, order_id: int, user: dict) -> dict:
+        order = await self.order_repository.get_order_by_id(order_id)
+        
+        if not order or order["user_id"] != user["id"]:
+            raise HTTPException(status_code=403, detail="You don't have permission to confirm completion of this order.")
+        
+        assignments = order.get("assignments", [])
+        if not any(assignment["status"] == "COMPLETED" for assignment in assignments):
+            raise HTTPException(status_code=400, detail="Order cannot be confirmed as completed until providers complete it.")
+        
+        await self.order_repository.update_order(order_id, {"status": "COMPLETED"})
+        
+        return {"id": order_id, "status": "COMPLETED"}
