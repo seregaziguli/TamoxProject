@@ -4,8 +4,8 @@ from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 import asyncio
 import logging
-from src.services.order_service import OrderService
-from src.repositories.order_repository import OrderRepository
+from src.services.order_service import OrderManagementService
+from src.repositories.order_repository import OrderManagementRepository
 from src.core.rabbitmq import consume
 from src.handlers.order_handler import RabbitMQConsumer 
 from src.config_env import RABBITMQ_URL, QUEUE_NAME 
@@ -15,8 +15,8 @@ from src.config_env import ORDER_SERVICE_URL
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-order_repository = OrderRepository(base_url=ORDER_SERVICE_URL)
-order_service = OrderService(order_repository=order_repository)
+order_management_repository = OrderManagementRepository(base_url=ORDER_SERVICE_URL)
+order_management_service = OrderManagementService(order_management_repository=order_management_repository)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -53,11 +53,11 @@ app.include_router(healthcheck_router)
 
 @app.get("/orders/{order_id}")
 async def get_order(order_id: int):
-    return await order_service.get_order_by_id(order_id)
+    return await order_management_service.get_order_by_id(order_id)
 
 @app.put("/orders/{order_id}")
 async def update_order(order_id: int, order_data: dict):
-    await order_service.update_order(order_id, order_data)
+    await order_management_service.update_order(order_id, order_data)
     return {"message": "Order updated successfully"}
 
 if __name__ == "__main__":

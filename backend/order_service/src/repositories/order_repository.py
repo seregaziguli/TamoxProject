@@ -70,7 +70,7 @@ class OrderRepository:
         
         return orders
     
-    async def complete_assignment(self, assignment_id: int):
+    async def complete_assignment(self, assignment_id: int) -> None:
         stmt = (
             update(OrderAssignment)
             .where(OrderAssignment.id == assignment_id)

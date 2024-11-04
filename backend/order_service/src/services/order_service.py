@@ -70,6 +70,11 @@ class OrderService:
         
         if order.status == OrderStatus.COMPLETED:
             raise HTTPException(status_code=400, detail="Order is already completed and cannot be reassigned.")
+    
+        if order.assignment_policy == OrderAssignmentPolicy.EXCLUSIVE:
+            existing_assignments = await self.order_repository.get_assignments_for_order(order_id)
+            if existing_assignments:
+                raise HTTPException(status_code=400, detail="Exclusive order can only have one assignment")
         
         assignment_data = {
             "order_id": order.id,
@@ -125,19 +130,19 @@ class OrderService:
         
     async def process_order(self, order_id: int, user: dict) -> OrderResponse:
         order = await self.order_repository.get_order_by_id(order_id)
-
+        
         if not order:
             raise HTTPException(status_code=404, detail="Order not found or access denied.")
 
+        assignments = await self.order_repository.get_assignments_for_order(order_id)
+        
         if order.assignment_policy == OrderAssignmentPolicy.MULTIPLE:
-            assignments = await self.order_repository.get_assignments_for_order(order_id)
-            
             if all(assignment.status == OrderAssignmentStatus.COMPLETED for assignment in assignments):
                 order.status = OrderStatus.COMPLETED
                 await self.order_repository.update_order(order_id, {"status": order.status})
             else:
                 raise HTTPException(status_code=400, detail="Order is not yet fully completed by all providers.")
-
+        
         return OrderResponse(
             id=order.id,
             description=order.description,
@@ -149,13 +154,12 @@ class OrderService:
     async def confirm_order_completion(self, order_id: int, user: dict) -> dict:
         order = await self.order_repository.get_order_by_id(order_id)
         
-        if not order or order["user_id"] != user["id"]:
+        if not order or order.user_id != user["id"]:
             raise HTTPException(status_code=403, detail="You don't have permission to confirm completion of this order.")
         
-        assignments = order.get("assignments", [])
-        if not any(assignment["status"] == "COMPLETED" for assignment in assignments):
+        assignments = await self.order_repository.get_assignments_for_order(order_id)
+        if not any(assignment.status == OrderAssignmentStatus.COMPLETED for assignment in assignments):
             raise HTTPException(status_code=400, detail="Order cannot be confirmed as completed until providers complete it.")
         
-        await self.order_repository.update_order(order_id, {"status": "COMPLETED"})
-        
+        await self.order_repository.update_order(order_id, {"status": OrderStatus.COMPLETED.value})
         return {"id": order_id, "status": "COMPLETED"}

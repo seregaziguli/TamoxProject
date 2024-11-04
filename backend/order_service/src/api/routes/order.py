@@ -93,6 +93,7 @@ async def process_order(
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="Could not process order.")
     
+
 @order_router.put("/{order_id}", response_model=OrderResponse, status_code=status.HTTP_200_OK)
 async def update_order(
     order_id: int,
@@ -112,6 +113,7 @@ async def update_order(
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="Could not update order.")
+    
     
 @order_router.post("/{order_id}/confirm_completion", status_code=status.HTTP_200_OK)
 async def confirm_order_completion(
