@@ -17,8 +17,8 @@ down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-order_status_enum = sa.Enum('NEW', 'IN PROGRESS', 'COMPLETED', 'CANCELLED', name='orderstatus')
-order_assignment_status_enum = sa.Enum('PENDING', 'IN PROGRESS', 'COMPLETED', 'CANCELLED', name='orderassignmentstatus')
+order_status_enum = sa.Enum('NEW', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', name='orderstatus')
+order_assignment_status_enum = sa.Enum('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', name='orderassignmentstatus')
 order_assignment_policy_enum = sa.Enum('EXCLUSIVE', 'MULTIPLE', name='orderassignmentpolicy')
 
 

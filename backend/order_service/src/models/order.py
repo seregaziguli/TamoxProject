@@ -8,13 +8,13 @@ import enum
 
 class OrderStatus(enum.Enum):
     NEW = "NEW"
-    IN_PROGRESS = "IN PROGRESS"
+    IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
 
 class OrderAssignmentStatus(enum.Enum):
     PENDIND = "PENDING"
-    IN_PROGRESS = "IN PROGRESS"
+    IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
 

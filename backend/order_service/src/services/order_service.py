@@ -136,12 +136,11 @@ class OrderService:
 
         assignments = await self.order_repository.get_assignments_for_order(order_id)
         
-        if order.assignment_policy == OrderAssignmentPolicy.MULTIPLE:
-            if all(assignment.status == OrderAssignmentStatus.COMPLETED for assignment in assignments):
-                order.status = OrderStatus.COMPLETED
-                await self.order_repository.update_order(order_id, {"status": order.status})
-            else:
-                raise HTTPException(status_code=400, detail="Order is not yet fully completed by all providers.")
+        if all(assignment.status == OrderAssignmentStatus.COMPLETED for assignment in assignments):
+            order.status = OrderStatus.IN_PROGRESS
+            await self.order_repository.update_order(order_id, {"status": order.status})
+        else:
+            raise HTTPException(status_code=400, detail="Order is not yet fully completed by all providers.")
         
         return OrderResponse(
             id=order.id,
@@ -158,7 +157,7 @@ class OrderService:
             raise HTTPException(status_code=403, detail="You don't have permission to confirm completion of this order.")
         
         assignments = await self.order_repository.get_assignments_for_order(order_id)
-        if not any(assignment.status == OrderAssignmentStatus.COMPLETED for assignment in assignments):
+        if not all(assignment.status == OrderAssignmentStatus.COMPLETED for assignment in assignments):
             raise HTTPException(status_code=400, detail="Order cannot be confirmed as completed until providers complete it.")
         
         await self.order_repository.update_order(order_id, {"status": OrderStatus.COMPLETED.value})

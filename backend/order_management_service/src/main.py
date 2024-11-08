@@ -6,7 +6,6 @@ import asyncio
 import logging
 from src.services.order_service import OrderManagementService
 from src.repositories.order_repository import OrderManagementRepository
-from src.core.rabbitmq import consume
 from src.handlers.order_handler import RabbitMQConsumer 
 from src.config_env import RABBITMQ_URL, QUEUE_NAME 
 from src.api.routes.healthcheck import healthcheck_router
