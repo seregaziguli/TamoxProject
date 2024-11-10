@@ -21,26 +21,21 @@ class AuthService:
         self.token_repo = TokenRepository(session)
 
     async def authenticate_user(self, email: str, password: str) -> Optional[UserTokenPydantic]:
-        logger.info("Authenticating user with email: %s", email)
-        user = await self.user_repo.get_user_by_email(email)
-        if user and verify_password(password, user.password):
-            logger.info("User authenticated successfully: %s", email)
-            tokens = await self._generate_tokens(user)
-            
-            user_token = await self.token_repo.get_token_by_user_id(user.id)
-            
-            if not user_token:
-                logger.error("Token generation failer for user: %s", email)
-                raise HTTPException(status_code=400, detail="Token generation failed.")
-            
-            return UserTokenPydantic(
-                id=user_token.id,
-                access_token=tokens["access_token"],
-                refresh_token=tokens["refresh_token"],
-                expires_at=user_token.expires_at
-            )
-        logger.warning("Invalid login attempt for email: %s", email)
-        raise HTTPException(status_code=400, detail="Invalid email or password.")
+            user = await self.user_repo.get_user_by_email(email)
+            if user and verify_password(password, user.password):
+                tokens = await self._generate_tokens(user)
+                user_token = await self.token_repo.get_token_by_user_id(user.id)
+                
+                if not user_token:
+                    raise HTTPException(status_code=400, detail="Token generation failed.")
+                
+                return UserTokenPydantic(
+                    id=user_token.id,
+                    access_token=tokens["access_token"],
+                    refresh_token=tokens["refresh_token"],
+                    expires_at=user_token.expires_at
+                )
+            raise HTTPException(status_code=400, detail="Invalid email or password.")
     
     async def refresh_tokens(self, refresh_token: str) -> dict:
         token_payload = get_token_payload(refresh_token, settings().SECRET_KEY, settings().JWT_ALGORITHM)
@@ -92,3 +87,45 @@ class AuthService:
             "refresh_token": refresh_token,
             "expires_at": at_expires.seconds
         }
+    
+    async def get_token_user(self, token: str):
+        payload = get_token_payload(token, settings().JWT_SECRET, settings().JWT_ALGORITHM)
+        if not payload:
+            return None
+        
+        logger.info(f"I WAS HERE 1 user id for decoding: {str_decode(payload.get('sub'))}")
+        
+        try:
+            user_token_id = str_decode(payload.get('r'))
+            user_id = str_decode(payload.get('sub'))
+            access_token = payload.get('a')
+
+            logger.info(f"I WAS HERE 2 user id for decoding: {str_decode(payload.get('sub'))}")
+
+            user_token = await self.token_repo.get_token_user_by_access(user_token_id, user_id, access_token)
+            if not user_token:
+                return await self.user_repo.get_user_with_tokens(user_token.user_id)
+            
+        except Exception as e:
+            logger.info(f"I WAS HERE 3 user id for decoding: {str_decode(payload.get('sub'))}")
+            raise HTTPException(status_code=400, detail=f"Error decoding token: {e}")
+
+        return None
+    
+    
+# так не работает
+# async def refresh_tokens(self, refresh_token: str) -> dict:
+#         token_payload = get_token_payload(refresh_token, settings().SECRET_KEY, settings().JWT_ALGORITHM)
+
+#         if not token_payload:
+#             raise HTTPException(status_code=400, detail="Invalid refresh token.")
+        
+#         user_token = await self.token_repo.get_user_token(refresh_token, token_payload['a'], token_payload['sub'])
+        
+#         if not user_token or user_token.expires_at <= datetime.utcnow():
+#             raise HTTPException(status_code=400, detail="Expired or invalid refresh token.")
+        
+#         user_token.expires_at = datetime.utcnow()
+#         await self.token_repo.update_token(user_token)
+
+#         return await self._generate_tokens(user_token.user)

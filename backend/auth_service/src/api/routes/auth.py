@@ -4,22 +4,18 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.schemas.user import LoginResponse, RegisterUserRequest, RegisterUserResponse, User as UserPydantic
-from src.core.security import get_current_user
-from src.db.session import get_async_session
-from src.models.user import User as UserSQLAlchemy
-from src.services.auth_service import AuthService 
+from src.api.deps.user_deps import get_current_user, get_async_session, get_auth_service
+from src.models.user import User as UserSQLAlchemy 
 from fastapi.exceptions import HTTPException
 from src.core.security import hash_password
 from src.utils.logger import logger
+from src.services.auth_service import AuthService
 
 auth_router = APIRouter(
     prefix="/users",
     tags=["Users"],
     responses={404: {"description": "Not found"}}
 )
-
-async def get_auth_service(session: AsyncSession = Depends(get_async_session)) -> AuthService:
-    return AuthService(session)
 
 @auth_router.post("/login", response_model=LoginResponse)
 async def user_login(data: OAuth2PasswordRequestForm = Depends(), auth_service: AuthService = Depends(get_auth_service)):
