@@ -9,23 +9,34 @@ from src.utils.logger import logger
 from src.models.order import OrderAssignment, OrderAssignmentStatus, OrderStatus
 from src.models.order import OrderAssignmentPolicy
 from fastapi import UploadFile
-from src.services.s3_service import S3Client
+from src.services.s3_service import s3_client
+import base64
 
 class OrderService:
     def __init__(self, order_repository: OrderRepository):
         self.order_repository = order_repository
-        self.s3_client = S3Client
+        self.s3_client = s3_client
 
     async def create_order(self, order: OrderRequest, user: dict, image: Optional[UploadFile] = None) -> OrderResponse:
         try:
-            scheduled_date_with_tz = datetime.now(timezone.utc)
-            scheduled_date_naive = scheduled_date_with_tz.replace(tzinfo=None)
+            scheduled_date_naive = datetime.now().replace(tzinfo=None)
 
             image_url = None
             if image:
-                object_name = self.s3_client.generate_object_name("orders", image.filename)
+                logger.info(f"Got some image: {image.filename}")
+                
+                if not image.filename:
+                    raise ValueError("Uploaded file must have a name")
+                
+                object_name = self.s3_client.generate_object_name("orders/images", image.filename)
+                
                 image_content = await image.read()
-                image_url = await self.s3_client.upload_image_bytes(image_content, object_name)
+                
+                encoded_image_content = base64.b64encode(image_content).decode('utf-8')
+                file_content = base64.b64decode(encoded_image_content)
+                await s3_client.upload_image_bytes(file_content, object_name)
+                
+                image_url = await self.s3_client.get_permanent_url(object_name)
 
             order_data = {
                 "user_id": user["id"],
@@ -34,23 +45,25 @@ class OrderService:
                 "scheduled_date": scheduled_date_naive,
                 "status": OrderStatus.NEW.value,
                 "assignment_policy": order.assignment_policy.value,
-                "image_url": image_url
+                "image_url": image_url, 
             }
-            new_order = await self.order_repository.create_order(order_data)
-            
-            logger.info(f"Order {new_order.id} successfully created for user {user['id']}.")
 
-            return OrderResponse(
-                id=new_order.id,
-                description=new_order.description,
-                service_type_name=new_order.service_type_name,
-                scheduled_date=new_order.scheduled_date,
-                status=new_order.status.value
+            new_order = await self.order_repository.create_order(order_data)
+
+            response = OrderResponse(
+            id=new_order.id,
+            description=new_order.description,
+            service_type_name=new_order.service_type_name,
+            scheduled_date=new_order.scheduled_date,
+            status=new_order.status.value,
+            image_url=image_url if image_url else None
             )
-            
+        
+            response.model_validate(response.model_dump()) 
+            return response
         except Exception as e:
-            logger.error("Failed to create order: %s", e)
-            raise HTTPException(status_code=500, detail="An error occurred while creating the order.")
+            logger.error
+
         
     async def update_order(self, order_id: int, order_data: dict, user: dict) -> OrderResponse:
         order = await self.order_repository.get_order_by_id(order_id)

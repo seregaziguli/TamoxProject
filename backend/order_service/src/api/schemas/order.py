@@ -11,6 +11,7 @@ class OrderResponse(BaseResponse):
     service_type_name: str
     scheduled_date: datetime
     status: str
+    image_url: Optional[str] = None
 
 class OrderRequest(BaseResponse):
     description: str

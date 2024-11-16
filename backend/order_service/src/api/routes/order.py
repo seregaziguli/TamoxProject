@@ -26,16 +26,17 @@ async def create_order(
         if isinstance(order, str):
             try:
                 order = OrderRequest.model_validate_json(order)
-            except Exception as e:
+            except Exception:
                 raise HTTPException(status_code=400, detail="Invalid input format")
-        new_order = await order_service.create_order(order, user)
+        
+        new_order = await order_service.create_order(order, user, image)
         return new_order
     except HTTPException as http_exc:
         raise http_exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
-    
 
+    
 @order_router.get("/", response_model=List[OrderResponse], status_code=status.HTTP_200_OK)
 async def get_user_orders(
     user: dict = Depends(get_current_user),

@@ -52,7 +52,6 @@ class S3Client:
     
     async def upload_image_bytes(self, file_content: bytes, object_name: str):
         logger.info(f"Uploading file to bucket: {self.bucket_name} with key: {object_name}")
-        
         async with self.get_client() as client:
             try:
                 response = await client.put_object(
@@ -60,10 +59,12 @@ class S3Client:
                     Key=object_name,
                     Body=file_content, 
                 )
+                logger.info(f"Upload successful: {response}")
             except ClientError as e:
                 logger.error(f"ClientError occurred: {e.response['Error']['Code']} - {e.response['Error']['Message']}")
                 raise e
         return object_name
+
     
     async def upload_image_fixed(self, temp_file_path, object_name: str):
         logger.info(f"Uploading file: {temp_file_path} to bucket: {self.bucket_name} with key: {object_name}")
