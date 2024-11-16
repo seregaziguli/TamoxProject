@@ -3,21 +3,29 @@ import fastapi
 from src.repositories.order_repository import OrderRepository
 from src.api.schemas.order import OrderRequest, OrderResponse
 import src.models.order
-from typing import List
+from typing import List, Optional
 from fastapi.exceptions import HTTPException
 from src.utils.logger import logger
 from src.models.order import OrderAssignment, OrderAssignmentStatus, OrderStatus
 from src.models.order import OrderAssignmentPolicy
-
+from fastapi import UploadFile
+from src.services.s3_service import S3Client
 
 class OrderService:
     def __init__(self, order_repository: OrderRepository):
         self.order_repository = order_repository
+        self.s3_client = S3Client
 
-    async def create_order(self, order: OrderRequest, user: dict) -> OrderResponse:
+    async def create_order(self, order: OrderRequest, user: dict, image: Optional[UploadFile] = None) -> OrderResponse:
         try:
             scheduled_date_with_tz = datetime.now(timezone.utc)
             scheduled_date_naive = scheduled_date_with_tz.replace(tzinfo=None)
+
+            image_url = None
+            if image:
+                object_name = self.s3_client.generate_object_name("orders", image.filename)
+                image_content = await image.read()
+                image_url = await self.s3_client.upload_image_bytes(image_content, object_name)
 
             order_data = {
                 "user_id": user["id"],
@@ -25,7 +33,8 @@ class OrderService:
                 "service_type_name": order.service_type_name,
                 "scheduled_date": scheduled_date_naive,
                 "status": OrderStatus.NEW.value,
-                "assignment_policy": order.assignment_policy.value
+                "assignment_policy": order.assignment_policy.value,
+                "image_url": image_url
             }
             new_order = await self.order_repository.create_order(order_data)
             

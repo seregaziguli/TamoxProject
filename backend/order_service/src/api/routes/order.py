@@ -1,10 +1,13 @@
-from fastapi import APIRouter, HTTPException, status, Depends
 from src.services.order_service import OrderService
 from src.api.deps.order_deps import get_current_user, get_order_service
 from src.api.schemas.order import OrderRequest, OrderResponse
 import logging
-from typing import List
+from typing import List, Union
 from src.utils.logger import logger
+from fastapi.exceptions import HTTPException
+from fastapi import status, APIRouter, Depends, UploadFile, File, Body
+from pydantic import Json
+import json
 
 order_router = APIRouter(
     prefix="/orders",
@@ -14,19 +17,22 @@ order_router = APIRouter(
 
 @order_router.post("/", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
 async def create_order(
-    order: OrderRequest,
+    order: Union[OrderRequest, str],
     user: dict = Depends(get_current_user),
-    order_service: OrderService = Depends(get_order_service)
+    order_service: OrderService = Depends(get_order_service),
+    image: UploadFile = File(None)
 ):
     try:
+        if isinstance(order, str):
+            try:
+                order = OrderRequest.model_validate_json(order)
+            except Exception as e:
+                raise HTTPException(status_code=400, detail="Invalid input format")
         new_order = await order_service.create_order(order, user)
-        logger.info("In function 1")
         return new_order
     except HTTPException as http_exc:
-        logger.error(f"Exc 1: {http_exc}")
         raise http_exc
     except Exception as exc:
-        logger.error(f"Exc 2: {exc}")
         raise HTTPException(status_code=500, detail=str(exc))
     
 

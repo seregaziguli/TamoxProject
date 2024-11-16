@@ -46,6 +46,7 @@ class Order(Base):
     status = Column(Enum(OrderStatus), default=OrderStatus.NEW, nullable=False)
     service_type_name = Column(String, nullable=True)
     assignment_policy = Column(Enum(OrderAssignmentPolicy), default=OrderAssignmentPolicy.MULTIPLE, nullable=False)
+    image_url = Column(String, nullable=True)
 
     assignments = relationship("OrderAssignment", back_populates="order")
 

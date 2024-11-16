@@ -23,7 +23,7 @@ class RegisterUserResponse(BaseResponse):
     phone_number: str
     # tokens: Dict[str, Any]
     
-class UserBase(BaseModel):
+class UserBase(BaseResponse):
     email: str
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
@@ -32,6 +32,15 @@ class User(UserBase):
     id: int
     is_active: bool
     tokens: List[UserToken]
+
+    class Config:
+        orm_mode = True
+
+class UserTokenPydantic(BaseResponse):
+    id: int
+    access_token: str
+    refresh_token: str
+    expires_at: datetime
 
     class Config:
         orm_mode = True

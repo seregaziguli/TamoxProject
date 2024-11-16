@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.schemas.user import LoginResponse, RegisterUserRequest, RegisterUserResponse, User as UserPydantic
+from src.api.schemas.user import LoginResponse, RegisterUserRequest, RegisterUserResponse, User as UserPydantic, UserTokenPydantic
 from src.api.deps.user_deps import get_current_user, get_async_session, get_auth_service
 from src.models.user import User as UserSQLAlchemy 
 from fastapi.exceptions import HTTPException
@@ -39,10 +39,29 @@ async def read_users_me(current_user: UserSQLAlchemy = Depends(get_current_user)
     user_with_tokens = await UserSQLAlchemy.get_user_with_tokens(session, current_user.id)
     return user_with_tokens
 
+@auth_router.get("/verify-token", response_model=UserPydantic)
+async def verify_token(
+    access_token: str = Header(...),
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    try:
+        user = await auth_service.get_token_user(access_token)
+        logger.info(f"access_token: {access_token}, user: {user}")
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid or expired token.")
+        return user
+    except Exception as e:
+        logger.error(f"Error verifying token: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=401, detail="Error verifying token")
+
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-@auth_router.post("", status_code=status.HTTP_201_CREATED, response_model=RegisterUserResponse)
-async def register_user(data: RegisterUserRequest, session: AsyncSession = Depends(get_async_session), auth_service: AuthService = Depends(get_auth_service)):
+@auth_router.post("", status_code=status.HTTP_201_CREATED, response_model=RegisterUserResponse) # this router accepts a post request from the registration service
+async def register_user(
+    data: RegisterUserRequest, 
+    session: AsyncSession = Depends(get_async_session),
+    auth_service: AuthService = Depends(get_auth_service)
+):
     existing_user = await session.execute(select(UserSQLAlchemy).where(UserSQLAlchemy.email == data.email))
     if existing_user.scalars().first():
         raise HTTPException(status_code=400, detail="User with this email already exists.")
@@ -52,13 +71,11 @@ async def register_user(data: RegisterUserRequest, session: AsyncSession = Depen
     
     session.add(new_user)
     await session.commit()
-    
-    tokens = await auth_service._generate_tokens(new_user)
-    
+
     return {
         "id": new_user.id,
         "name": data.name,
         "email": new_user.email,
         "phone_number": data.phone_number,
-        "tokens": tokens
+        "message": "User registered successfully. No tokens generated."
     }

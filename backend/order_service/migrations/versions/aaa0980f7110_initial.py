@@ -33,6 +33,7 @@ def upgrade() -> None:
         sa.Column('status', order_status_enum, default='NEW', nullable=False),
         sa.Column('service_type_name', sa.String(), nullable=True),
         sa.Column('assignment_policy', order_assignment_policy_enum, default='MULTIPLE', nullable=False),
+        sa.Column('image_url', sa.String(), nullable=True),
     )
 
     op.create_table(
