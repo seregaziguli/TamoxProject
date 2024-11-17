@@ -11,6 +11,7 @@ from src.models.order import OrderAssignmentPolicy
 from fastapi import UploadFile
 from src.services.s3_service import s3_client
 import base64
+from src.config_env import DB_PASS
 
 class OrderService:
     def __init__(self, order_repository: OrderRepository):
@@ -34,9 +35,11 @@ class OrderService:
                 
                 encoded_image_content = base64.b64encode(image_content).decode('utf-8')
                 file_content = base64.b64decode(encoded_image_content)
+                logger.info(f"Uploading image bytes")
                 await s3_client.upload_image_bytes(file_content, object_name)
-                
+                logger.info(f"Uploaded image bytes")
                 image_url = await self.s3_client.get_permanent_url(object_name)
+                logger.info(f"Image URL (1): {image_url}")
 
             order_data = {
                 "user_id": user["id"],
@@ -58,11 +61,15 @@ class OrderService:
             status=new_order.status.value,
             image_url=image_url if image_url else None
             )
+
+            logger.info(f"Creating OrderResponse with data: {new_order}")
+            logger.info(f"Image URL (2): {image_url}")
+            logger.info(f"response: {response}")
         
             response.model_validate(response.model_dump()) 
             return response
         except Exception as e:
-            logger.error
+            logger.error(f"Error while creating order: {e}")
 
         
     async def update_order(self, order_id: int, order_data: dict, user: dict) -> OrderResponse:

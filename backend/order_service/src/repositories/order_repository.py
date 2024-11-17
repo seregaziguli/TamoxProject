@@ -17,6 +17,7 @@ class OrderRepository:
         await self.db.commit()
         await self.db.refresh(new_order)
 
+        logger.info(f"Order created: {new_order}")
         return new_order
 
     async def get_order_by_id(self, order_id: int) -> Order:

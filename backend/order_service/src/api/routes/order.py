@@ -22,19 +22,13 @@ async def create_order(
     order_service: OrderService = Depends(get_order_service),
     image: UploadFile = File(None)
 ):
-    try:
-        if isinstance(order, str):
-            try:
-                order = OrderRequest.model_validate_json(order)
-            except Exception:
-                raise HTTPException(status_code=400, detail="Invalid input format")
-        
-        new_order = await order_service.create_order(order, user, image)
-        return new_order
-    except HTTPException as http_exc:
-        raise http_exc
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+    if isinstance(order, str):
+        try:
+            order = OrderRequest.model_validate_json(order)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid input format: {str(e)}")
+
+    return await order_service.create_order(order, user, image)
 
     
 @order_router.get("/", response_model=List[OrderResponse], status_code=status.HTTP_200_OK)

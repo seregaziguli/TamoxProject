@@ -24,6 +24,7 @@ class S3Client:
         }
         self.bucket_name = bucket_name
         self.session = get_session()
+        logger.info(f"just data: (1){ACCESS_KEY} ,SECRET_KEY: {SECRET_KEY} ,ENDPOINT_URL: {ENDPOINT_URL} ,BUCKET_NAME: {BUCKET_NAME}")
 
     @asynccontextmanager
     async def get_client(self):
@@ -51,17 +52,19 @@ class S3Client:
         return object_name
     
     async def upload_image_bytes(self, file_content: bytes, object_name: str):
+        logger.info(f"just data: (2){ACCESS_KEY} ,SECRET_KEY: {SECRET_KEY} ,ENDPOINT_URL: {ENDPOINT_URL} ,BUCKET_NAME: {BUCKET_NAME}")
         logger.info(f"Uploading file to bucket: {self.bucket_name} with key: {object_name}")
         async with self.get_client() as client:
             try:
                 response = await client.put_object(
                     Bucket=self.bucket_name,
                     Key=object_name,
-                    Body=file_content, 
+                    Body=file_content,
                 )
-                logger.info(f"Upload successful: {response}")
-            except ClientError as e:
-                logger.error(f"ClientError occurred: {e.response['Error']['Code']} - {e.response['Error']['Message']}")
+                logger.info(f"Uploaded successfully: {response}")
+            except Exception as e:
+                logger.error(f"Error occurred: {e}. Bucket: {self.bucket_name}, Key: {object_name}")
+                logger.error(f"Other data. bucket name: {self.bucket_name}, access_key: {self.access_key} secret_key: {self.secret_key} endpoint_url: {self.endpoint_url}")
                 raise e
         return object_name
 
@@ -89,8 +92,10 @@ class S3Client:
         return object_name
 
     def generate_object_name(self, prefix: str, original_filename: str):
+        logger.info(f"Generating object name...")
         extension = original_filename.split('.')[-1]
         unique_name = f"{prefix}/{uuid.uuid4()}.{extension}"
+        logger.info("Name object generated successfully.")
         return unique_name
 
     async def get_permanent_url(self, object_name: str):
@@ -127,3 +132,5 @@ s3_client = S3Client(
     endpoint_url=ENDPOINT_URL,
     bucket_name=BUCKET_NAME,
 )
+
+logger.info(f"just data: (3){ACCESS_KEY} ,SECRET_KEY: {SECRET_KEY} ,ENDPOINT_URL: {ENDPOINT_URL} ,BUCKET_NAME: {BUCKET_NAME}")
