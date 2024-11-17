@@ -146,6 +146,28 @@ services:
     networks:
       - app_network
 
+  redis:
+    image: redis:7
+    container_name: redis_app
+    command: --port 6379
+    expose:
+      - 6379
+    networks:
+      - app_network
+
+  taskiq:
+    build:
+      context: ./backend/order_service
+      dockerfile: Dockerfile
+    container_name: taskiq_worker
+    environment:
+      - TASKIQ_BROKER=redis://redis:6379 
+    depends_on:
+      - redis
+    command: ["taskiq", "worker", "src.utils.background_tasks.tasks:broker"]
+    networks:
+      - app_network
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     hostname: rabbitmq

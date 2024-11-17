@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 import fastapi
+from src.utils.background_tasks.tasks import upload_image_task
 from src.repositories.order_repository import OrderRepository
 from src.api.schemas.order import OrderRequest, OrderResponse
 import src.models.order
@@ -11,7 +12,6 @@ from src.models.order import OrderAssignmentPolicy
 from fastapi import UploadFile
 from src.services.s3_service import s3_client
 import base64
-from src.config_env import DB_PASS
 
 class OrderService:
     def __init__(self, order_repository: OrderRepository):
@@ -34,10 +34,9 @@ class OrderService:
                 image_content = await image.read()
                 
                 encoded_image_content = base64.b64encode(image_content).decode('utf-8')
-                file_content = base64.b64decode(encoded_image_content)
-                logger.info(f"Uploading image bytes")
-                await s3_client.upload_image_bytes(file_content, object_name)
-                logger.info(f"Uploaded image bytes")
+
+                await upload_image_task.kiq(encoded_image_content, object_name)
+
                 image_url = await self.s3_client.get_permanent_url(object_name)
                 logger.info(f"Image URL (1): {image_url}")
 
