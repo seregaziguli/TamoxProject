@@ -124,7 +124,8 @@ class OrderService:
                 description=order.description,
                 service_type_name=order.service_type_name,
                 scheduled_date=order.scheduled_date,
-                status=order.status.value
+                status=order.status.value,
+                image_url=order.image_url
             )
             for order in orders
         ]
@@ -138,7 +139,8 @@ class OrderService:
                 description=order.description,
                 service_type_name=order.service_type_name,
                 scheduled_date=order.scheduled_date,
-                status=order.status.value
+                status=order.status.value,
+                image_url=order.image_url
             )
             for order in orders
         ]
@@ -153,7 +155,8 @@ class OrderService:
             description=order.description,
             service_type_name=order.service_type_name,
             scheduled_date=order.scheduled_date,
-            status=order.status.value
+            status=order.status.value,
+            image_url=order.image_url
         )
         
     async def process_order(self, order_id: int, user: dict) -> OrderResponse:
@@ -175,7 +178,8 @@ class OrderService:
             description=order.description,
             service_type_name=order.service_type_name,
             scheduled_date=order.scheduled_date,
-            status=order.status.value
+            status=order.status.value,
+            image_url=order.image_url
         )
     
     async def confirm_order_completion(self, order_id: int, user: dict) -> dict:
