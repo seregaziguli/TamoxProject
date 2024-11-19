@@ -1,24 +1,54 @@
 .my-profile-container {
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
+  padding: 20px;
 }
 
-.order-select {
+.text-2xl {
+  font-size: 1.5rem;
+  font-weight: bold;
   margin-bottom: 20px;
 }
 
-.order-details {
+.order-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.order-card {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out;
+  cursor: pointer;
 }
 
-.order-details h2 {
+.order-card:hover {
+  transform: translateY(-5px);
+}
+
+.order-card h2 {
   margin-bottom: 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
-.order-details p {
+.order-card p {
   margin: 5px 0;
+}
+
+.order-details {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.order-image {
+  margin-top: 20px;
+  max-width: 100%;
+  border-radius: 8px;
 }

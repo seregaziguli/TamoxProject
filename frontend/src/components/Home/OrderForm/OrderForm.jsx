@@ -31,7 +31,7 @@ export default function OrderForm() {
     };
 
     const formData = new FormData();
-    formData.append("order", JSON.stringify(orderPayload)); // Правильный формат JSON
+    formData.append("order", JSON.stringify(orderPayload));
     if (orderForm.file) {
       formData.append("image", orderForm.file);
     }

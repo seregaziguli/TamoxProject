@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Select from "react-select";
-import { useSpring, animated } from "react-spring"; 
-import OrderCard from "../OrderCard/OrderCard";
-import OrderDetailModal from "../OrderDetailModal/OrderDetailModal";
 import "./MyProfile.css";
 
 export default function MyProfile() {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orderImage, setOrderImage] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -34,25 +30,26 @@ export default function MyProfile() {
     fetchOrders();
   }, []);
 
-  const animationProps = useSpring({
-    opacity: selectedOrder ? 1 : 0,
-    transform: selectedOrder ? "translateY(0)" : "translateY(-20px)",
-  });
-
-  const orderOptions = orders.map((order) => ({
-    value: order.id,
-    label: `Order #${order.id} - ${order.description}`,
-  }));
-
-  const handleOrderChange = (selectedOption) => {
-    const order = orders.find((o) => o.id === selectedOption.value);
-    setSelectedOrder(order);
-    setIsModalOpen(true); // Open modal on selection
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedOrder(null);
+  const fetchOrderDetails = async (order) => {
+    try {
+      const auth_token = localStorage.getItem("access_token");
+      const response = await axios.get(
+        `http://localhost:8007/orders/images/${order.image_url}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "access-token": auth_token,
+          },
+          responseType: "arraybuffer",
+        }
+      );
+      const imageBlob = new Blob([response.data], { type: "image/jpeg" });
+      const imageUrl = URL.createObjectURL(imageBlob);
+      setOrderImage(imageUrl);
+      setSelectedOrder(order);
+    } catch (error) {
+      setError(error.response ? error.response.data : error);
+    }
   };
 
   if (isLoading) {
@@ -66,32 +63,31 @@ export default function MyProfile() {
   return (
     <div className="my-profile-container">
       <h1 className="text-2xl mb-4">My Orders</h1>
-      <Select
-        className="order-select"
-        options={orderOptions}
-        onChange={handleOrderChange}
-        placeholder="Select an order..."
-        isClearable
-      />
+      <div className="order-grid">
+        {orders.map((order) => (
+          <div
+            key={order.id}
+            className="order-card"
+            onClick={() => fetchOrderDetails(order)}
+          >
+            <h2>Order #{order.id}</h2>
+            <p><strong>Title:</strong> {order.title}</p>
+            <p><strong>Description:</strong> {order.description}</p>
+            <p><strong>Service Type:</strong> {order.service_type_name}</p>
+          </div>
+        ))}
+      </div>
 
       {selectedOrder && (
-        <animated.div style={animationProps} className="order-details">
-          <h2 className="text-xl font-bold">Order Details</h2>
-          <p>
-            <strong>Service Type:</strong> {selectedOrder.service_type_name}
-          </p>
-          <p>
-            <strong>Scheduled Date:</strong>{" "}
-            {new Date(selectedOrder.scheduled_date).toLocaleString()}
-          </p>
-          <p>
-            <strong>Status:</strong> {selectedOrder.status}
-          </p>
-        </animated.div>
-      )}
-
-      {isModalOpen && (
-        <OrderDetailModal order={selectedOrder} onClose={closeModal} />
+        <div className="order-details">
+          <h2>Order Details</h2>
+          <p><strong>Title:</strong> {selectedOrder.title}</p>
+          <p><strong>Description:</strong> {selectedOrder.description}</p>
+          <p><strong>Service Type:</strong> {selectedOrder.service_type_name}</p>
+          <p><strong>Scheduled Date:</strong> {new Date(selectedOrder.scheduled_date).toLocaleString()}</p>
+          <p><strong>Status:</strong> {selectedOrder.status}</p>
+          {orderImage && <img src={orderImage} alt="Order Image" className="order-image" />}
+        </div>
       )}
     </div>
   );
