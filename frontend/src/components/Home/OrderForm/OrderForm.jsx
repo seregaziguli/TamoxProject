@@ -7,30 +7,42 @@ export default function OrderForm() {
     serviceTypeName: "",
     scheduledDate: "",
     assignmentPolicy: "MULTIPLE",
+    file: null,
   });
 
   const onChangeForm = (label, event) => {
-    setOrderForm({ ...orderForm, [label]: event.target.value });
+    if (label === "file") {
+      setOrderForm({ ...orderForm, file: event.target.files[0] });
+    } else {
+      setOrderForm({ ...orderForm, [label]: event.target.value });
+    }
   };
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
 
-    const orderData = {
+    const orderPayload = {
       description: orderForm.description,
       service_type_name: orderForm.serviceTypeName,
-      scheduled_date: new Date(orderForm.scheduledDate).toISOString(),
-      assignment_policy: orderForm.assignmentPolicy, 
+      scheduled_date: orderForm.scheduledDate
+        ? new Date(orderForm.scheduledDate).toISOString()
+        : null,
+      assignment_policy: orderForm.assignmentPolicy,
     };
+
+    const formData = new FormData();
+    formData.append("order", JSON.stringify(orderPayload)); // Правильный формат JSON
+    if (orderForm.file) {
+      formData.append("image", orderForm.file);
+    }
 
     try {
       const auth_token = localStorage.getItem("access_token");
       const response = await axios.post(
         "http://localhost:8007/orders",
-        orderData,
+        formData,
         {
           headers: {
-            "Content-Type": "application/json",
             "access-token": auth_token,
           },
         }
@@ -72,6 +84,13 @@ export default function OrderForm() {
             className="block text-sm py-2 px-4 tracking-wider w-72 font-normal rounded-lg border outline-none"
             value={orderForm.scheduledDate}
             onChange={(e) => onChangeForm("scheduledDate", e)}
+          ></input>
+
+          <input
+            type="file"
+            accept="image/*"
+            className="block text-sm py-2 px-4 tracking-wider w-72 font-normal rounded-lg border outline-none"
+            onChange={(e) => onChangeForm("file", e)}
           ></input>
 
           <select

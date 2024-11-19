@@ -38,7 +38,6 @@ class OrderService:
                 await upload_image_task.kiq(encoded_image_content, object_name)
 
                 image_url = await self.s3_client.get_permanent_url(object_name)
-                logger.info(f"Image URL (1): {image_url}")
 
             order_data = {
                 "user_id": user["id"],
@@ -62,9 +61,7 @@ class OrderService:
             )
 
             logger.info(f"Creating OrderResponse with data: {new_order}")
-            logger.info(f"Image URL (2): {image_url}")
-            logger.info(f"response: {response}")
-        
+
             response.model_validate(response.model_dump()) 
             return response
         except Exception as e:

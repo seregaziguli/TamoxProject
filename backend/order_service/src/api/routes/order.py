@@ -1,5 +1,5 @@
 from src.services.order_service import OrderService
-from src.api.deps.order_deps import get_current_user, get_order_service
+from src.api.deps.order_deps import get_current_user, get_order_service, get_s3_client
 from src.api.schemas.order import OrderRequest, OrderResponse
 import logging
 from typing import List, Union
@@ -8,6 +8,9 @@ from fastapi.exceptions import HTTPException
 from fastapi import status, APIRouter, Depends, UploadFile, File, Body
 from pydantic import Json
 import json
+from fastapi.responses import StreamingResponse
+import io
+from src.services.s3_service import S3Client
 
 order_router = APIRouter(
     prefix="/orders",
@@ -131,3 +134,18 @@ async def confirm_order_completion(
     except Exception as exc:
         logger.error(f"Error confirmed order completion: {exc}")
         raise HTTPException(status_code=500, detail="Could not confirm order completion.")
+    
+
+@order_router.get("/images/{object_name:path}")
+async def get_image(
+    object_name: str,
+    s3_service: S3Client = Depends(get_s3_client),
+    ):
+    logger.info(f"Retrieving image with object name: {object_name}")
+    
+    file_content = await s3_service.get_image(object_name)
+    
+    if file_content is None:
+        raise HTTPException(status_code=404, detail="Image not found.")
+    
+    return StreamingResponse(io.BytesIO(file_content), media_type="image/jpeg")

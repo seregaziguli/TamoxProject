@@ -8,9 +8,9 @@ import {
 } from "react-router-dom";
 import Login from "./components/Form/Login/Login";
 import Register from "./components/Form/Register/Register";
-import Order from "./components/Home/Order/Order"
 import Home from "./components/Home/Home";
 import MyProfile from "./components/Home/MyProfile/MyProfile";
+import OrderForm from "./components/Home/OrderForm/OrderForm";
 
 export default function App() {
   const [token, setToken] = useState();
@@ -41,7 +41,7 @@ export default function App() {
         {token && (
           <>
             <Route path="/" element={<Home />}></Route>
-            <Route path="/orders" element={<Order />}></Route>
+            <Route path="/orders" element={<OrderForm />}></Route>
             <Route path="/myprofile" element={<MyProfile />}></Route>
             {/* Redirect to / if logged in */}
             <Route path="*" element={<Navigate to={"/"} />}></Route>
