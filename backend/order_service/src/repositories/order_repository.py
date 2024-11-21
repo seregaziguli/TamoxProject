@@ -1,4 +1,4 @@
-from sqlalchemy import update
+from sqlalchemy import update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from src.models.order import Order
@@ -19,6 +19,11 @@ class OrderRepository:
 
         logger.info(f"Order created: {new_order}")
         return new_order
+    
+    async def delete_order(self, order_id: int) -> None:
+        stmt = delete(Order).where(Order.id == order_id)
+        await self.db.execute(stmt)
+        await self.db.commit()
 
     async def get_order_by_id(self, order_id: int) -> Order:
         stmt = select(Order).where(Order.id == order_id)

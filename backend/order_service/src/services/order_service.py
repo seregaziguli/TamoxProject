@@ -67,7 +67,7 @@ class OrderService:
         except Exception as e:
             logger.error(f"Error while creating order: {e}")
 
-        
+    # it may not work
     async def update_order(self, order_id: int, order_data: dict, user: dict) -> OrderResponse:
         order = await self.order_repository.get_order_by_id(order_id)
         if not order or order.user_id != user['id']:
@@ -87,6 +87,13 @@ class OrderService:
             status=order.status.value
         )
     
+    async def delete_order(self, order_id: int, user: dict) -> None:
+        order = await self.order_repository.get_order_by_id(order_id)
+        if not order or order.user_id != user["id"]:
+            raise HTTPException(status_code=403, detail="You don't have permission to delete this order.")
+
+        await self.order_repository.delete_order(order_id)
+
     async def assign_order(self, order_id: int, provider_id: int) -> OrderAssignment:
         order = await self.order_repository.get_order_by_id(order_id)
 

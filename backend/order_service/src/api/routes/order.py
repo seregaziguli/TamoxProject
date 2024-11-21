@@ -34,6 +34,21 @@ async def create_order(
 
     return await order_service.create_order(order, user, image)
 
+
+@order_router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_order(
+    order_id: int,
+    user: dict = Depends(get_current_user),
+    order_service: OrderService = Depends(get_order_service)
+):
+    try:
+        await order_service.delete_order(order_id, user)
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception as e:
+        logger.error(f"Error while deleting order: {e}")
+        raise HTTPException(status_code=500, detail="Could not delete order.")
+
     
 @order_router.get("/", response_model=List[OrderResponse], status_code=status.HTTP_200_OK)
 async def get_user_orders(
