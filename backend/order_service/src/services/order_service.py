@@ -162,6 +162,9 @@ class OrderService:
         if not order:
             raise HTTPException(status_code=404, detail="Order not found or access denied.")
 
+        if order.user_id == user["id"]:
+            raise HTTPException(status_code=403, detail="You cannot process your own order.")
+
         assignments = await self.order_repository.get_assignments_for_order(order_id)
         
         if all(assignment.status == OrderAssignmentStatus.COMPLETED for assignment in assignments):

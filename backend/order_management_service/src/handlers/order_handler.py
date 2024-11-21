@@ -18,31 +18,42 @@ async def handle_order_message(order_info: str) -> None:
             return
 
         async with httpx.AsyncClient() as client:
-            update_data = {
-                "status": new_status,
-                "scheduled_date": new_scheduled_date
-            }
-            update_data = {k: v for k, v in update_data.items() if v is not None}
+            # Получаем данные о заказе для проверки
+            order_response = await client.get(f"http://order_service:8002/orders/{order_id}")
+            if order_response.status_code == 200:
+                order = order_response.json()
+                user_id = order.get("user_id")
 
-            if update_data:
-                response = await client.put(f"http://order_service:8002/orders/{order_id}", json=update_data)
-                if response.status_code == 200:
-                    logger.info("Order update with ID %s completed successfully.", order_id)
-                else:
-                    logger.error("Failed to update order with ID %s. Response status: %s", order_id, response.status_code)
+                # Если это тот же пользователь, который создал заказ, не даем обновить
+                if user_id == order_data.get("user_id"):
+                    logger.error(f"User {order_data.get('user_id')} is trying to process their own order {order_id}")
+                    return
 
-            check_response = await client.get(f"http://order_service:8002/orders/{order_id}/process")
-            if check_response.status_code == 200:
-                check_data = check_response.json()
-                if check_data.get("status") == "COMPLETED":
-                    logger.info("Order with ID %s marked as COMPLETED.", order_id)
+                update_data = {
+                    "status": new_status,
+                    "scheduled_date": new_scheduled_date
+                }
+                update_data = {k: v for k, v in update_data.items() if v is not None}
+
+                if update_data:
+                    response = await client.put(f"http://order_service:8002/orders/{order_id}", json=update_data)
+                    if response.status_code == 200:
+                        logger.info("Order update with ID %s completed successfully.", order_id)
+                    else:
+                        logger.error("Failed to update order with ID %s. Response status: %s", order_id, response.status_code)
+
+                check_response = await client.get(f"http://order_service:8002/orders/{order_id}/process")
+                if check_response.status_code == 200:
+                    check_data = check_response.json()
+                    if check_data.get("status") == "COMPLETED":
+                        logger.info("Order with ID %s marked as COMPLETED.", order_id)
             else:
-                logger.error("Failed to check completion status for order ID %s", order_id)
-
+                logger.error("Failed to fetch order details for order ID %s", order_id)
     except json.JSONDecodeError:
         logger.error("Incorrect format JSON: %s", order_info)
     except Exception as e:
         logger.error(f"Error while parsing order: {str(e)}, {order_info}")
+
 
 class RabbitMQConsumer:
     def __init__(self, rabbitmq_url: str, queue_name: str):
