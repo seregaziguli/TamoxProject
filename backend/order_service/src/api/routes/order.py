@@ -11,6 +11,7 @@ import json
 from fastapi.responses import StreamingResponse
 import io
 from src.services.s3_service import S3Client
+from fastapi_cache.decorator import cache
 
 order_router = APIRouter(
     prefix="/orders",
@@ -48,6 +49,7 @@ async def get_user_orders(
     
 
 @order_router.get("/all", response_model=List[OrderResponse], status_code=status.HTTP_200_OK)
+@cache(expire=180)
 async def get_all_orders(
     order_service: OrderService = Depends(get_order_service)
 ):
