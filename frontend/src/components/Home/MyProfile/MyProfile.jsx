@@ -47,9 +47,34 @@ export default function MyProfile() {
       const imageUrl = URL.createObjectURL(imageBlob);
       setOrderImage(imageUrl);
       setSelectedOrder(order);
+      document.body.classList.add("no-scroll");
     } catch (error) {
       setError(error.response ? error.response.data : error);
     }
+  };
+
+  const deleteOrder = async (orderId) => {
+    try {
+      const auth_token = localStorage.getItem("access_token");
+      await axios.delete(`http://localhost:8007/orders/${orderId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "access-token": auth_token,
+        },
+      });
+      setOrders((prevOrders) =>
+        prevOrders.filter((order) => order.id !== orderId)
+      );
+      closeModal();
+    } catch (error) {
+      setError(error.response ? error.response.data : error);
+    }
+  };
+
+  const closeModal = () => {
+    setSelectedOrder(null);
+    setOrderImage(null);
+    document.body.classList.remove("no-scroll");
   };
 
   if (isLoading) {
@@ -71,22 +96,69 @@ export default function MyProfile() {
             onClick={() => fetchOrderDetails(order)}
           >
             <h2>Order #{order.id}</h2>
-            <p><strong>Title:</strong> {order.title}</p>
-            <p><strong>Description:</strong> {order.description}</p>
-            <p><strong>Service Type:</strong> {order.service_type_name}</p>
+            <p>
+              <strong>Title:</strong> {order.title}
+            </p>
+            <p>
+              <strong>Description:</strong> {order.description}
+            </p>
+            <p>
+              <strong>Service Type:</strong> {order.service_type_name}
+            </p>
           </div>
         ))}
       </div>
 
       {selectedOrder && (
-        <div className="order-details">
-          <h2>Order Details</h2>
-          <p><strong>Title:</strong> {selectedOrder.title}</p>
-          <p><strong>Description:</strong> {selectedOrder.description}</p>
-          <p><strong>Service Type:</strong> {selectedOrder.service_type_name}</p>
-          <p><strong>Scheduled Date:</strong> {new Date(selectedOrder.scheduled_date).toLocaleString()}</p>
-          <p><strong>Status:</strong> {selectedOrder.status}</p>
-          {orderImage && <img src={orderImage} alt="Order Image" className="order-image" />}
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Order Details</h2>
+            <p>
+              <strong>Title:</strong> {selectedOrder.title}
+            </p>
+            <p>
+              <strong>Description:</strong> {selectedOrder.description}
+            </p>
+            <p>
+              <strong>Service Type:</strong> {selectedOrder.service_type_name}
+            </p>
+            <p>
+              <strong>Scheduled Date:</strong>{" "}
+              {new Date(selectedOrder.scheduled_date).toLocaleString()}
+            </p>
+            <p>
+              <strong>Status:</strong> {selectedOrder.status}
+            </p>
+            {orderImage && (
+              <img src={orderImage} alt="Order" className="order-image" />
+            )}
+            <div className="modal-buttons">
+              <button onClick={closeModal}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  color="#000000"
+                  fill="none"
+                >
+                  <path
+                    d="M19.0005 4.99988L5.00049 18.9999M5.00049 4.99988L19.0005 18.9999"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={() => deleteOrder(selectedOrder.id)}
+                className="modal-delete-btn"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

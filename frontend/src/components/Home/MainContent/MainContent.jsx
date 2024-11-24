@@ -21,9 +21,11 @@ export default function MainContent() {
           },
         });
         setOrders(response.data);
-        setIsLoading(false);
       } catch (error) {
-        setError(error.response ? error.response.data : error);
+        const errorMessage =
+          error.response?.data?.message || error.message || "Unknown error occurred";
+        setError(errorMessage);
+      } finally {
         setIsLoading(false);
       }
     }
@@ -32,6 +34,11 @@ export default function MainContent() {
   }, []);
 
   const handleOrderClick = async (orderId) => {
+    if (!orderId) {
+      console.error("Invalid orderId");
+      return;
+    }
+
     try {
       const auth_token = localStorage.getItem("access_token");
       const response = await axios.post(
@@ -46,10 +53,9 @@ export default function MainContent() {
       );
       console.log("Order processed successfully:", response.data);
     } catch (error) {
-      console.error(
-        "Error processing order:",
-        error.response ? error.response.data : error
-      );
+      const errorMessage =
+        error.response?.data?.message || error.message || "Failed to process order";
+      console.error("Error processing order:", errorMessage);
     }
   };
 
@@ -68,7 +74,7 @@ export default function MainContent() {
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="text-red-500">Error: {error}</div>;
   }
 
   return (
@@ -76,17 +82,21 @@ export default function MainContent() {
       <div className="orders-list mt-6">
         <h1 className="text-3xl mb-2">Orders</h1>
         <div className="grid grid-cols-1 gap-4">
-          {orders.map((order) => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              onProcess={handleOrderClick}
-              onOpenModal={openModal}
-            />
-          ))}
+          {Array.isArray(orders) && orders.length > 0 ? (
+            orders.map((order) => (
+              <OrderCard
+                key={order.id}
+                order={order}
+                onProcess={handleOrderClick}
+                onOpenModal={openModal}
+              />
+            ))
+          ) : (
+            <div>No orders found.</div>
+          )}
         </div>
 
-        {isModalOpen && (
+        {isModalOpen && selectedOrder && (
           <OrderDetailModal order={selectedOrder} onClose={closeModal} />
         )}
       </div>
