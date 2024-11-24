@@ -16,7 +16,6 @@ from fastapi_cache.decorator import cache
 order_router = APIRouter(
     prefix="/orders",
     tags=["Orders"],
-    responses={404: {"description": "Not found"}}
 )
 
 @order_router.post("/", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
@@ -74,6 +73,21 @@ async def get_all_orders(
     except Exception as e:
         logger.error(f"Error while retrieving all orders: {e}")
         raise HTTPException(status_code=500, detail="Could not retrieve all orders.")
+    
+
+@order_router.get("/user-notifications", status_code=status.HTTP_200_OK)
+async def get_notifications(
+    user: dict = Depends(get_current_user),
+    order_service: OrderService = Depends(get_order_service)
+):
+    try:
+        notifications = await order_service.get_user_notifications(user["id"])
+        return notifications
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error(f"Unexpected error retrieving notifications: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error.")
     
     
 @order_router.get("/{order_id}", response_model=OrderResponse, status_code=status.HTTP_200_OK)

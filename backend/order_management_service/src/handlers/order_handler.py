@@ -18,13 +18,11 @@ async def handle_order_message(order_info: str) -> None:
             return
 
         async with httpx.AsyncClient() as client:
-            # Получаем данные о заказе для проверки
             order_response = await client.get(f"http://order_service:8002/orders/{order_id}")
             if order_response.status_code == 200:
                 order = order_response.json()
                 user_id = order.get("user_id")
 
-                # Если это тот же пользователь, который создал заказ, не даем обновить
                 if user_id == order_data.get("user_id"):
                     logger.error(f"User {order_data.get('user_id')} is trying to process their own order {order_id}")
                     return

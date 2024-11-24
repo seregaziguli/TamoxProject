@@ -69,7 +69,6 @@ class AuthService:
     async def _generate_tokens(self, user: User) -> dict:
         logger.info(f"In _generate_tokens function")
         
-        # Удаление старых токенов пользователя
         await self.token_repo.delete_tokens_by_user_id(user.id)
 
         refresh_token = unique_string(100)

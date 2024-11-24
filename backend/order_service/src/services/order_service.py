@@ -12,6 +12,10 @@ from src.models.order import OrderAssignmentPolicy
 from fastapi import UploadFile
 from src.services.s3_service import s3_client
 import base64
+from src.utils.messaging import send_message
+import json, httpx
+from src.config_env import RABBITMQ_URL
+from src.config_env import NOTIFICATION_SERVICE_URL
 
 class OrderService:
     def __init__(self, order_repository: OrderRepository):
@@ -200,4 +204,28 @@ class OrderService:
             raise HTTPException(status_code=400, detail="Order cannot be confirmed as completed until providers complete it.")
         
         await self.order_repository.update_order(order_id, {"status": OrderStatus.COMPLETED.value})
+
+        notification_message = {
+            "order_id": order_id,
+            "creator_id": order.user_id,
+            "message": f"Order {order_id} has been completed by all assigned users."
+        }
+        await send_message(json.dumps(notification_message), "notifications", RABBITMQ_URL)
+
         return {"id": order_id, "status": "COMPLETED"}
+    
+    async def get_user_notifications(self, user_id: int) -> list:
+        async with httpx.AsyncClient() as client:
+            try:
+                logger.info(f'URL for request: {NOTIFICATION_SERVICE_URL}/notifications/{user_id}')
+                response = await client.get(
+                    f"{NOTIFICATION_SERVICE_URL}/notifications/{user_id}"
+                )
+                response.raise_for_status()
+                return response.json()
+            except httpx.RequestError as e:
+                logger.error(f"Failed to connect to Notification Service: {e}")
+                raise HTTPException(status_code=502, detail="Notification Service is unavailable.")
+            except httpx.HTTPStatusError as e:
+                logger.error(f"Notification Service returned an error: {e.response.status_code}")
+                raise HTTPException(status_code=500, detail="Failed to fetch notifications.")

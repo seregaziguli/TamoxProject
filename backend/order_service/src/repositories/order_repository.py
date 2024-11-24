@@ -10,7 +10,7 @@ from src.models.order import OrderAssignmentStatus
 class OrderRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
-
+        
     async def create_order(self, order_data: dict) -> Order:
         new_order = Order(**order_data)
         self.db.add(new_order)
