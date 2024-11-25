@@ -47,5 +47,7 @@ class NotificationService:
                     try:
                         notification_data = json.loads(message.body)
                         await self.notification_repository.create_notification(notification_data)
+                        logger.info(f"Processed notification: {notification_data}")
                     except Exception as e:
                         logger.error(f"Error processing message: {e}")
+

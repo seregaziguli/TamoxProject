@@ -181,6 +181,14 @@ class OrderService:
         if all(assignment.status == OrderAssignmentStatus.COMPLETED for assignment in assignments):
             order.status = OrderStatus.IN_PROGRESS
             await self.order_repository.update_order(order_id, {"status": order.status})
+
+            notification_message = {
+            "order_id": order_id,
+            "creator_id": order.user_id,
+            "executor_id": user["id"], 
+            "message": f"User {user['id']} started processing order {order_id}."
+            }
+            await send_message(json.dumps(notification_message), "notifications", RABBITMQ_URL)
         else:
             raise HTTPException(status_code=400, detail="Order is not yet fully completed by all providers.")
         
@@ -204,13 +212,6 @@ class OrderService:
             raise HTTPException(status_code=400, detail="Order cannot be confirmed as completed until providers complete it.")
         
         await self.order_repository.update_order(order_id, {"status": OrderStatus.COMPLETED.value})
-
-        notification_message = {
-            "order_id": order_id,
-            "creator_id": order.user_id,
-            "message": f"Order {order_id} has been completed by all assigned users."
-        }
-        await send_message(json.dumps(notification_message), "notifications", RABBITMQ_URL)
 
         return {"id": order_id, "status": "COMPLETED"}
     
