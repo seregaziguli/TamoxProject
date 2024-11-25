@@ -81,7 +81,10 @@ async def get_notifications(
     order_service: OrderService = Depends(get_order_service)
 ):
     try:
-        notifications = await order_service.get_user_notifications(user["id"])
+        if not isinstance(user["id"], int):
+            raise HTTPException(status_code=400, detail="Invalid user ID format.")
+        user_id = int(user["id"])
+        notifications = await order_service.get_user_notifications(user_id)
         return notifications
     except HTTPException as e:
         raise e

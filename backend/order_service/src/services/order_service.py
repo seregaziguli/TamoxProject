@@ -218,10 +218,11 @@ class OrderService:
     async def get_user_notifications(self, user_id: int) -> list:
         async with httpx.AsyncClient() as client:
             try:
-                logger.info(f'URL for request: {NOTIFICATION_SERVICE_URL}/notifications/{user_id}')
+                logger.info(f'user_id type: {type(user_id)}; URL for request: {NOTIFICATION_SERVICE_URL}/notifications/{user_id}')
                 response = await client.get(
-                    f"{NOTIFICATION_SERVICE_URL}/notifications/{user_id}"
+                    f"http://notification_service:8000/notifications/{user_id}" 
                 )
+                logger.info(f"alive after request")
                 response.raise_for_status()
                 return response.json()
             except httpx.RequestError as e:
