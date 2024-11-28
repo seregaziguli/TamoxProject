@@ -17,7 +17,7 @@ auth_router = APIRouter(
     responses={404: {"description": "Not found"}}
 )
 
-@auth_router.post("/login", response_model=LoginResponse)
+@auth_router.post("/login", response_model=LoginResponse) 
 async def user_login(data: OAuth2PasswordRequestForm = Depends(), auth_service: AuthService = Depends(get_auth_service)):
     logger.info("User login attempt for username: %s", data.username)
     token = await auth_service.authenticate_user(data.username, data.password)

@@ -9,24 +9,35 @@ class LoginResponse(BaseResponse):
     refresh_token: str
     expires_at: Any
     token_type: str = "Bearer"
+
+    class Config:
+        orm_mode = True
     
 class RegisterUserRequest(BaseResponse):
     name: str
     email: EmailStr
     password: str
     phone_number: str
+
+    class Config:
+        orm_mode = True
     
 class RegisterUserResponse(BaseResponse):
     id: int
     name: str
     email: EmailStr
     phone_number: str
-    # tokens: Dict[str, Any]
+
+    class Config:
+        orm_mode = True
     
 class UserBase(BaseResponse):
     email: str
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
+
+    class Config:
+        orm_mode = True
     
 class User(UserBase):
     id: int

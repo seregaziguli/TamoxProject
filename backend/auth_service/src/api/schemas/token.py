@@ -7,11 +7,17 @@ class UserToken(BaseResponse):
     access_token: str
     refresh_token: str
     expires_at: Any
+
+    class Config:
+        orm_mode = True
     
 class TokenResponse(BaseResponse):
     access_token: str
     refresh_token: str
     expires_at: Any
+    
+    class Config:
+        orm_mode = True
 
 class UserTokenPydantic(BaseResponse):
     id: int

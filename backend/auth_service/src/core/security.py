@@ -16,7 +16,7 @@ from sqlalchemy import select
 logger = logging.getLogger('uvicorn.error')
 SPECIAL_CHARACTERS = ['@', '#', '$', '%', '=', ':', '?', '.', '/', '|', '~', '>']
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login") # The endpoint where the user can get a token
 app_settings = settings()
 
 def hash_password(password):
