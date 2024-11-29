@@ -11,7 +11,7 @@ from src.core.security import hash_password, verify_password, generate_token, ge
 from src.repositories.user_repository import UserRepository
 from src.repositories.token_repository import TokenRepository
 from src.core.config import settings
-from src.utils.string.string_utils import unique_string
+from src.utils.string_utils import unique_string
 from src.utils.logger import logger
 
 class TokenService:

@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     TEST_DB_USER: str
     TEST_DB_PASS: str
 
+    AUTH_SERVICE_URL: str = "http://auth_service:8000"
+
     # App
     APP_NAME:  str = os.environ.get("APP_NAME", "FastAPI")
     DEBUG: bool = bool(os.environ.get("DEBUG", False))

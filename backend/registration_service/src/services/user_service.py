@@ -1,18 +1,18 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 from src.repositories.user_repository import UserRepository
 from src.api.schemas.user import RegisterUserRequest
 from src.core.security import hash_password
 import httpx
 import logging
+from src.services.auth_service_client import AuthServiceClient
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('socketio')
 
 class UserService:
-    def __init__(self, session: AsyncSession):
-        self.session = session
-        self.user_repository = UserRepository(session)
+    def __init__(self, user_repository: UserRepository, auth_service_client: AuthServiceClient):
+        self.user_repository = user_repository
+        self.auth_service_client = auth_service_client
 
     async def register_user(self, data: RegisterUserRequest):
         existing_user = await self.user_repository.get_user_by_phone(data.phone_number)
@@ -26,18 +26,19 @@ class UserService:
             phone_number=data.phone_number,
             hashed_password=hashed_password
         )
-        
-        async with httpx.AsyncClient() as client:
-            auth_data = {
+
+        try:
+            await self.auth_service_client.create_user({
                 "name": data.name,
                 "email": data.email,
                 "password": data.password,
                 "phone_number": data.phone_number
-            }
-            response = await client.post("http://auth_service:8000/users", json=auth_data)
-            logger.info(f"Response from auth service: {response.status_code}")
-            
-            if response.status_code != 201:
-                raise HTTPException(status_code=response.status_code, detail="Failed to create account")
-        
+            })
+
+        except Exception as e:
+            logger.error(f"Error while creating user: {e}")
+            raise HTTPException(status_code=500, detail='Failed to create account')
+
         return new_user
+        
+        

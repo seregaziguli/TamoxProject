@@ -1,17 +1,11 @@
-from datetime import datetime, timedelta
 from typing import Optional
-
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-
-from src.models.user import User, UserToken
+from src.models.user import User
 from src.api.schemas.token import UserToken as UserTokenPydantic
 from src.core.security import verify_password
 from src.repositories.user_repository import UserRepository
-from src.repositories.token_repository import TokenRepository
 from src.core.config import settings
-from src.utils.string.string_utils import unique_string
 from src.utils.logger import logger
 from src.services.token_service import TokenService
 
