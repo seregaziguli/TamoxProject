@@ -4,8 +4,8 @@ from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 import asyncio
 import logging
-from src.services.order_service import OrderManagementService
-from src.repositories.order_repository import OrderManagementRepository
+from src.services.order_management_service import OrderManagementService
+from src.repositories.order_management_repository import OrderManagementRepository
 from src.handlers.order_handler import RabbitMQConsumer 
 from src.config_env import RABBITMQ_URL, QUEUE_NAME 
 from src.api.routes.healthcheck import healthcheck_router
@@ -20,10 +20,8 @@ order_management_service = OrderManagementService(order_management_repository=or
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info("Starting lifespan...")
-
-    consumer = RabbitMQConsumer(RABBITMQ_URL, QUEUE_NAME)
+    consumer = RabbitMQConsumer(RABBITMQ_URL, QUEUE_NAME, order_management_service)
     task = asyncio.create_task(consumer.start())
-    
     try:
         yield
     finally:
