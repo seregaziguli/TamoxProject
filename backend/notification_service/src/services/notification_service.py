@@ -10,7 +10,7 @@ class NotificationService:
     def __init__(self, notification_repository: NotificationRepository):
         self.notification_repository = notification_repository
 
-    async def create_notification_repository(self, order_id: int, creator_id: int, executor_id: int, message: str) -> Notification: # TODO: изменить название
+    async def create_notification(self, order_id: int, creator_id: int, executor_id: int, message: str) -> Notification:
         notification_data = {
             "order_id": order_id,
             "creator_id": creator_id,

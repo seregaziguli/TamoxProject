@@ -13,5 +13,5 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
 BUCKET_NAME = os.environ.get("BUCKET_NAME")
 RABBITMQ_URL = os.environ.get("RABBITMQ_URL") or "amqp://guest:guest_pass@rabbitmq:5672/"
-NOTIFICATION_SERVICE_URL = os.environ.get("NOTIFICATION_SERVICE_URL") or 'http://notification_service:8008'
+NOTIFICATION_SERVICE_URL = os.environ.get("NOTIFICATION_SERVICE_URL") or 'http://notification_service:8000'
 AUTH_SERVICE_URL = os.environ.get("AUTH_SERVICE_URL") or "http://auth_service:8000"
