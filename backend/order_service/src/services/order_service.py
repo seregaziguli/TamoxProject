@@ -16,33 +16,25 @@ from src.utils.messaging import send_message
 import json, httpx
 from src.config_env import RABBITMQ_URL
 from src.config_env import NOTIFICATION_SERVICE_URL
+from src.services.image_service import ImageService
+from src.services.messaging_service import MessagingService
 
 class OrderService:
-    def __init__(self, order_repository: OrderRepository):
+    def __init__(
+            self, 
+            order_repository: OrderRepository,
+            image_service: ImageService,
+            messaging_service: MessagingService
+            ):
         self.order_repository = order_repository
-        self.s3_client = s3_client
+        self.image_service = image_service
+        self.messaging_service = messaging_service
 
     async def create_order(self, order: OrderRequest, user: dict, image: Optional[UploadFile] = None) -> OrderResponse:
         try:
             scheduled_date_naive = datetime.now().replace(tzinfo=None)
 
-            image_url = None
-            if image:
-                logger.info(f"Got some image: {image.filename}")
-                
-                if not image.filename:
-                    raise ValueError("Uploaded file must have a name")
-                
-                object_name = self.s3_client.generate_object_name("orders/images", image.filename)
-                
-                image_content = await image.read()
-                
-                encoded_image_content = base64.b64encode(image_content).decode('utf-8')
-
-                await upload_image_task.kiq(encoded_image_content, object_name)
-
-                image_url = await self.s3_client.get_permanent_url(object_name)
-
+            image_url = None 
             order_data = {
                 "user_id": user["id"],
                 "description": order.description,
@@ -53,23 +45,31 @@ class OrderService:
                 "image_url": image_url, 
             }
 
+            if image:
+                if not image.filename:
+                    raise ValueError("Uploaded file must have a name")
+                
+                logger.info(f"Processing image: {image.filename}")
+                image_url = await self.image_service.upload_image(image)
+                order_data["image_url"] = image_url 
+
             new_order = await self.order_repository.create_order(order_data)
 
             response = OrderResponse(
-            id=new_order.id,
-            description=new_order.description,
-            service_type_name=new_order.service_type_name,
-            scheduled_date=new_order.scheduled_date,
-            status=new_order.status.value,
-            image_url=image_url if image_url else None
+                id=new_order.id,
+                description=new_order.description,
+                service_type_name=new_order.service_type_name,
+                scheduled_date=new_order.scheduled_date,
+                status=new_order.status.value,
+                image_url=image_url if image_url else None
             )
 
             logger.info(f"Creating OrderResponse with data: {new_order}")
-
-            response.model_validate(response.model_dump()) 
+            response.model_validate(response.model_dump())
             return response
         except Exception as e:
             logger.error(f"Error while creating order: {e}")
+
 
     # it may not work
     async def update_order(self, order_id: int, order_data: dict, user: dict) -> OrderResponse:
@@ -169,7 +169,7 @@ class OrderService:
         
     async def process_order(self, order_id: int, user: dict) -> OrderResponse:
         order = await self.order_repository.get_order_by_id(order_id)
-        
+
         if not order:
             raise HTTPException(status_code=404, detail="Order not found or access denied.")
 
@@ -177,21 +177,23 @@ class OrderService:
             raise HTTPException(status_code=403, detail="You cannot process your own order.")
 
         assignments = await self.order_repository.get_assignments_for_order(order_id)
-        
+
         if all(assignment.status == OrderAssignmentStatus.COMPLETED for assignment in assignments):
             order.status = OrderStatus.IN_PROGRESS
             await self.order_repository.update_order(order_id, {"status": order.status})
 
             notification_message = {
-            "order_id": order_id,
-            "creator_id": order.user_id,
-            "executor_id": user["id"], 
-            "message": f"User {user['id']} started processing order {order_id}."
+                "order_id": order_id,
+                "creator_id": order.user_id,
+                "executor_id": user["id"], 
+                "message": f"User {user['id']} started processing order {order_id}."
             }
-            await send_message(json.dumps(notification_message), "notifications", RABBITMQ_URL)
+
+            await self.messaging_service.send_message(json.dumps(notification_message), "notifications")
+
         else:
             raise HTTPException(status_code=400, detail="Order is not yet fully completed by all providers.")
-        
+
         return OrderResponse(
             id=order.id,
             description=order.description,
@@ -200,7 +202,7 @@ class OrderService:
             status=order.status.value,
             image_url=order.image_url
         )
-    
+
     async def confirm_order_completion(self, order_id: int, user: dict) -> dict:
         order = await self.order_repository.get_order_by_id(order_id)
         
@@ -218,9 +220,8 @@ class OrderService:
     async def get_user_notifications(self, user_id: int) -> list:
         async with httpx.AsyncClient() as client:
             try:
-                logger.info(f'user_id type: {type(user_id)}; URL for request: {NOTIFICATION_SERVICE_URL}/notifications/{user_id}')
                 response = await client.get(
-                    f"http://notification_service:8000/notifications/{user_id}" 
+                    f"{NOTIFICATION_SERVICE_URL}/notifications/{user_id}"  # f"http://notification_service:8000/notifications/{user_id}" 
                 )
                 logger.info(f"alive after request")
                 response.raise_for_status()
