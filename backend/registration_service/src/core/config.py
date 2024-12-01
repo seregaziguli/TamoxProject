@@ -17,11 +17,13 @@ class Settings(BaseSettings):
     TEST_DB_USER: str
     TEST_DB_PASS: str
 
-    AUTH_SERVICE_URL: str = "http://auth_service:8000"
+    AUTH_SERVICE_URL: str
 
-    # App
-    APP_NAME:  str = os.environ.get("APP_NAME", "FastAPI")
-    DEBUG: bool = bool(os.environ.get("DEBUG", False))
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_HOST: str
+    POSTGRES_PORT: int
+    POSTGRES_DB: str
 
     # JWT Secret Key
     JWT_SECRET: str

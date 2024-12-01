@@ -9,7 +9,6 @@ COPY ./src /app/src
 COPY ./scripts/start.sh /app/scripts/start.sh
 COPY alembic.ini /app/alembic.ini
 COPY ./migrations /app/migrations
-COPY .env-non-dev /app/.env-non-dev
 COPY .env /app/.env
 
 RUN chmod +x /app/scripts/start.sh
