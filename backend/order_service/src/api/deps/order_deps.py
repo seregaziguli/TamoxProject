@@ -5,7 +5,7 @@ from src.services.order_service import OrderService
 from src.db.session import get_async_session
 from src.utils.user import verify_user
 from src.services.s3_service import S3Client
-from src.config_env import ACCESS_KEY, SECRET_KEY, ENDPOINT_URL, BUCKET_NAME, RABBITMQ_URL
+from src.core.conifg import settings
 from src.services.messaging_service import MessagingService
 from src.services.image_service import ImageService
 
@@ -17,14 +17,14 @@ async def get_current_user(user: dict = Depends(verify_user)) -> dict:
 
 async def get_s3_client() -> S3Client:
     return S3Client(
-    access_key=ACCESS_KEY,
-    secret_key=SECRET_KEY,
-    endpoint_url=ENDPOINT_URL,
-    bucket_name=BUCKET_NAME,
+    access_key=settings().ACCESS_KEY,
+    secret_key=settings().SECRET_KEY,
+    endpoint_url=settings().ENDPOINT_URL,
+    bucket_name=settings().BUCKET_NAME,
     )
 
 async def get_messaging_service() -> MessagingService:
-    return MessagingService(rabbitmq_url=RABBITMQ_URL)
+    return MessagingService(rabbitmq_url=settings().RABBITMQ_URL)
 
 async def get_image_service(s3_client: S3Client = Depends(get_s3_client)) -> ImageService:
     return ImageService(s3_client=s3_client)

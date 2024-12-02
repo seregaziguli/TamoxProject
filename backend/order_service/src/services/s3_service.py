@@ -5,7 +5,7 @@ import os
 from aiobotocore.session import get_session
 from botocore.exceptions import ClientError
 import uuid
-from src.config_env import ACCESS_KEY, SECRET_KEY, ENDPOINT_URL, BUCKET_NAME
+from src.core.conifg import settings
 from typing import Union
 from src.utils.logger import logger
 
@@ -24,7 +24,7 @@ class S3Client:
         }
         self.bucket_name = bucket_name
         self.session = get_session()
-        logger.info(f"just data: (1){ACCESS_KEY} ,SECRET_KEY: {SECRET_KEY} ,ENDPOINT_URL: {ENDPOINT_URL} ,BUCKET_NAME: {BUCKET_NAME}")
+        logger.info(f"just data: (1){settings().ACCESS_KEY} ,SECRET_KEY: {settings().SECRET_KEY} ,ENDPOINT_URL: {settings().ENDPOINT_URL} ,BUCKET_NAME: {settings().BUCKET_NAME}")
 
     @asynccontextmanager
     async def get_client(self):
@@ -52,7 +52,7 @@ class S3Client:
         return object_name
     
     async def upload_image_bytes(self, file_content: bytes, object_name: str):
-        logger.info(f"just data: (2){ACCESS_KEY} ,SECRET_KEY: {SECRET_KEY} ,ENDPOINT_URL: {ENDPOINT_URL} ,BUCKET_NAME: {BUCKET_NAME}")
+        logger.info(f"just data: (2){settings().ACCESS_KEY} ,SECRET_KEY: {settings().SECRET_KEY} ,ENDPOINT_URL: {settings().ENDPOINT_URL} ,BUCKET_NAME: {settings().BUCKET_NAME}")
         logger.info(f"Uploading file to bucket: {self.bucket_name} with key: {object_name}")
         async with self.get_client() as client:
             try:
@@ -127,10 +127,10 @@ class S3Client:
         return await self.get_file(object_name)
 
 s3_client = S3Client(
-    access_key=ACCESS_KEY,
-    secret_key=SECRET_KEY,
-    endpoint_url=ENDPOINT_URL,
-    bucket_name=BUCKET_NAME,
+    access_key=settings().ACCESS_KEY,
+    secret_key=settings().SECRET_KEY,
+    endpoint_url=settings().ENDPOINT_URL,
+    bucket_name=settings().BUCKET_NAME,
 )
 
-logger.info(f"just data: (3){ACCESS_KEY} ,SECRET_KEY: {SECRET_KEY} ,ENDPOINT_URL: {ENDPOINT_URL} ,BUCKET_NAME: {BUCKET_NAME}")
+logger.info(f"just data: (3){settings().ACCESS_KEY} ,SECRET_KEY: {settings().SECRET_KEY} ,ENDPOINT_URL: {settings().ENDPOINT_URL} ,BUCKET_NAME: {settings().BUCKET_NAME}")

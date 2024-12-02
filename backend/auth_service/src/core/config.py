@@ -17,6 +17,12 @@ class Settings(BaseSettings):
     TEST_DB_USER: str
     TEST_DB_PASS: str
 
+    POSTGRES_USER: str
+    POSTGRES_PASS: str
+    POSTGRES_HOST: str
+    POSTGRES_PORT: int
+    POSTGRES_DB: str
+    
     # JWT Secret Key
     JWT_SECRET: str
     JWT_ALGORITHM: str

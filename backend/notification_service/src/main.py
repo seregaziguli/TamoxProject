@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from src.services.notification_service import NotificationService
 from src.repositories.notification_repository import NotificationRepository
 from src.db.session import async_session_maker
-from src.config_env import RABBITMQ_URL
+from src.core.config import settings
 from src.api.routes import notification, healthcheck
 
 
@@ -15,7 +15,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     async with async_session_maker() as session:
         repository = NotificationRepository(session)
         service = NotificationService(repository)
-        task = asyncio.create_task(service.process_notifications(RABBITMQ_URL))
+        task = asyncio.create_task(service.process_notifications(settings().RABBITMQ_URL))
 
         try:
             yield

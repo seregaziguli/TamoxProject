@@ -14,8 +14,7 @@ from src.services.s3_service import s3_client
 import base64
 from src.utils.messaging import send_message
 import json, httpx
-from src.config_env import RABBITMQ_URL
-from src.config_env import NOTIFICATION_SERVICE_URL
+from src.core.conifg import settings
 from src.services.image_service import ImageService
 from src.services.messaging_service import MessagingService
 
@@ -221,7 +220,7 @@ class OrderService:
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.get(
-                    f"{NOTIFICATION_SERVICE_URL}/notifications/{user_id}"  # f"http://notification_service:8000/notifications/{user_id}" 
+                    f"{settings().NOTIFICATION_SERVICE_URL}/notifications/{user_id}" 
                 )
                 logger.info(f"alive after request")
                 response.raise_for_status()

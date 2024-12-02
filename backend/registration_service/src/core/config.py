@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     AUTH_SERVICE_URL: str
 
     POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
+    POSTGRES_PASS: str
     POSTGRES_HOST: str
     POSTGRES_PORT: int
     POSTGRES_DB: str

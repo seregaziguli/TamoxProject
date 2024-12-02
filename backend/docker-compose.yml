@@ -14,7 +14,7 @@ services:
           condition: service_healthy
       environment:
         POSTGRES_USER: "postgres"
-        POSTGRES_PASSWORD: "34tgw3eg"
+        POSTGRES_PASS: "34tgw3eg"
         POSTGRES_DB: "auth_service_db"
         POSTGRES_HOST: "auth_db"
         POSTGRES_PORT: "5432"
@@ -34,7 +34,7 @@ services:
         condition: service_healthy
     environment:
       POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "34tgw3eg"
+      POSTGRES_PASS: "34tgw3eg"
       POSTGRES_DB: "registration_service_db"
       POSTGRES_HOST: "registration_db"
       POSTGRES_PORT: "5432"
@@ -56,7 +56,7 @@ services:
         condition: service_started
     environment:
       POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "34tgw3eg"
+      POSTGRES_PASS: "34tgw3eg"
       POSTGRES_DB: "order_service_db"
       POSTGRES_HOST: "order_db"
       POSTGRES_PORT: "5432"
@@ -73,7 +73,7 @@ services:
       - auth_db_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "34tgw3eg"
+      POSTGRES_PASS: "34tgw3eg"
       POSTGRES_DB: "auth_service_db"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres", "-d", "auth_service_db", "-h", "localhost"]
@@ -91,7 +91,7 @@ services:
       - registration_db_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "34tgw3eg"
+      POSTGRES_PASS: "34tgw3eg"
       POSTGRES_DB: "registration_service_db"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres", "-d", "registration_service_db", "-h", "localhost"]
@@ -109,7 +109,7 @@ services:
       - order_db_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "34tgw3eg"
+      POSTGRES_PASS: "34tgw3eg"
       POSTGRES_DB: "order_service_db"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres", "-d", "order_service_db", "-h", "localhost"]
@@ -143,7 +143,7 @@ services:
       - app_network
     environment:
       POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "34tgw3eg"
+      POSTGRES_PASS: "34tgw3eg"
       POSTGRES_DB: "notification_service_db"
       POSTGRES_HOST: "notification_db"
       POSTGRES_PORT: "5432"
@@ -161,7 +161,7 @@ services:
       - notification_db_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "34tgw3eg"
+      POSTGRES_PASS: "34tgw3eg"
       POSTGRES_DB: "notification_service_db"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres", "-d", "notification_service_db", "-h", "localhost"]
