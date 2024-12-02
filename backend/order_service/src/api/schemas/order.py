@@ -5,7 +5,7 @@ from datetime import datetime
 from enum import Enum
 from src.models.order import OrderAssignmentPolicy
 
-class OrderResponse(BaseResponse):
+class OrderResponseDTO(BaseResponse):
     id: int
     description: str
     service_type_name: str
@@ -13,7 +13,7 @@ class OrderResponse(BaseResponse):
     status: str
     image_url: Optional[str] = None
 
-class OrderRequest(BaseResponse):
+class OrderRequestDTO(BaseResponse):
     description: str
     service_type_name: str 
     scheduled_date: Optional[datetime] = None

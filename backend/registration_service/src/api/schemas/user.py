@@ -3,19 +3,19 @@ from pydantic import EmailStr
 from typing import Optional, Union
 from src.api.schemas.base import BaseResponse
 
-class UserResponse(BaseResponse):
+class UserResponseDTO(BaseResponse):
     id: int
     email: str
     name: str
     phone_number: str
     created_at: Optional[str]
     
-class RegisterUserRequest(BaseResponse):
+class RegisterUserRequestDTO(BaseResponse):
     name: str
     email: EmailStr
     password: str
     phone_number: str
     
-class VerifyUserRequest(BaseResponse):
+class VerifyUserRequestDTO(BaseResponse):
     token: str
     email: str

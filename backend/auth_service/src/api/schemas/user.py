@@ -2,9 +2,9 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr
 from typing import Optional, Union, Dict, Any, List
 from src.api.schemas.base import BaseResponse
-from src.api.schemas.token import UserToken
+from src.api.schemas.token import UserTokenDTO
 
-class LoginResponse(BaseResponse):
+class LoginResponseDTO(BaseResponse):
     access_token: str
     refresh_token: str
     expires_at: Any
@@ -13,7 +13,7 @@ class LoginResponse(BaseResponse):
     class Config:
         orm_mode = True
     
-class RegisterUserRequest(BaseResponse):
+class RegisterUserRequestDTO(BaseResponse):
     name: str
     email: EmailStr
     password: str
@@ -22,7 +22,7 @@ class RegisterUserRequest(BaseResponse):
     class Config:
         orm_mode = True
     
-class RegisterUserResponse(BaseResponse):
+class RegisterUserResponseDTO(BaseResponse):
     id: int
     name: str
     email: EmailStr
@@ -42,16 +42,7 @@ class UserBase(BaseResponse):
 class User(UserBase):
     id: int
     is_active: bool
-    tokens: List[UserToken]
-
-    class Config:
-        orm_mode = True
-
-class UserTokenPydantic(BaseResponse):
-    id: int
-    access_token: str
-    refresh_token: str
-    expires_at: datetime
+    tokens: List[UserTokenDTO]
 
     class Config:
         orm_mode = True

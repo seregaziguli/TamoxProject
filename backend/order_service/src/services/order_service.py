@@ -1,18 +1,13 @@
-from datetime import datetime, timezone
-import fastapi
+from datetime import datetime
 from src.utils.background_tasks.tasks import upload_image_task
 from src.repositories.order_repository import OrderRepository
-from src.api.schemas.order import OrderRequest, OrderResponse
-import src.models.order
+from src.api.schemas.order import OrderRequestDTO, OrderResponseDTO
 from typing import List, Optional
 from fastapi.exceptions import HTTPException
 from src.utils.logger import logger
 from src.models.order import OrderAssignment, OrderAssignmentStatus, OrderStatus
 from src.models.order import OrderAssignmentPolicy
 from fastapi import UploadFile
-from src.services.s3_service import s3_client
-import base64
-from src.utils.messaging import send_message
 import json, httpx
 from src.core.conifg import settings
 from src.services.image_service import ImageService
@@ -29,7 +24,7 @@ class OrderService:
         self.image_service = image_service
         self.messaging_service = messaging_service
 
-    async def create_order(self, order: OrderRequest, user: dict, image: Optional[UploadFile] = None) -> OrderResponse:
+    async def create_order(self, order: OrderRequestDTO, user: dict, image: Optional[UploadFile] = None) -> OrderResponseDTO:
         try:
             scheduled_date_naive = datetime.now().replace(tzinfo=None)
 
@@ -54,7 +49,7 @@ class OrderService:
 
             new_order = await self.order_repository.create_order(order_data)
 
-            response = OrderResponse(
+            response = OrderResponseDTO(
                 id=new_order.id,
                 description=new_order.description,
                 service_type_name=new_order.service_type_name,
@@ -63,7 +58,7 @@ class OrderService:
                 image_url=image_url if image_url else None
             )
 
-            logger.info(f"Creating OrderResponse with data: {new_order}")
+            logger.info(f"Creating OrderResponseDTO with data: {new_order}")
             response.model_validate(response.model_dump())
             return response
         except Exception as e:
@@ -71,7 +66,7 @@ class OrderService:
 
 
     # it may not work
-    async def update_order(self, order_id: int, order_data: dict, user: dict) -> OrderResponse:
+    async def update_order(self, order_id: int, order_data: dict, user: dict) -> OrderResponseDTO:
         order = await self.order_repository.get_order_by_id(order_id)
         if not order or order.user_id != user['id']:
             raise HTTPException(status_code=403, detail="You don't have permission to update this order.")
@@ -82,7 +77,7 @@ class OrderService:
             order.scheduled_date = order_data['scheduled_date']
 
         await self.order_repository.update_order(order_id, order_data)
-        return OrderResponse(
+        return OrderResponseDTO(
             id=order.id,
             description=order.description,
             service_type_name=order.service_type_name,
@@ -122,11 +117,11 @@ class OrderService:
         logger.debug(f"Creating assignment {assignment} with data {assignment_data}")
         return assignment
         
-    async def get_user_orders(self, user: dict) -> List[OrderResponse]:
+    async def get_user_orders(self, user: dict) -> List[OrderResponseDTO]:
         orders = await self.order_repository.get_user_orders(user["id"])
         
         return [
-            OrderResponse(
+            OrderResponseDTO(
                 id=order.id,
                 description=order.description,
                 service_type_name=order.service_type_name,
@@ -137,11 +132,11 @@ class OrderService:
             for order in orders
         ]
         
-    async def get_all_orders(self) -> List[OrderResponse]:
+    async def get_all_orders(self) -> List[OrderResponseDTO]:
         orders = await self.order_repository.get_all_orders()
         
         return [
-            OrderResponse(
+            OrderResponseDTO(
                 id=order.id,
                 description=order.description,
                 service_type_name=order.service_type_name,
@@ -152,12 +147,12 @@ class OrderService:
             for order in orders
         ]
         
-    async def get_order_by_id(self, order_id: int, user: dict) -> OrderResponse:
+    async def get_order_by_id(self, order_id: int, user: dict) -> OrderResponseDTO:
         order = await self.order_repository.get_order_by_id(order_id)
         if not order or order.user_id != user["id"]:
             raise HTTPException(status_code=404, detail="Order not found or access denied.")
         
-        return OrderResponse(
+        return OrderResponseDTO(
             id=order.id,
             description=order.description,
             service_type_name=order.service_type_name,
@@ -166,7 +161,7 @@ class OrderService:
             image_url=order.image_url
         )
         
-    async def process_order(self, order_id: int, user: dict) -> OrderResponse:
+    async def process_order(self, order_id: int, user: dict) -> OrderResponseDTO:
         order = await self.order_repository.get_order_by_id(order_id)
 
         if not order:
@@ -193,7 +188,7 @@ class OrderService:
         else:
             raise HTTPException(status_code=400, detail="Order is not yet fully completed by all providers.")
 
-        return OrderResponse(
+        return OrderResponseDTO(
             id=order.id,
             description=order.description,
             service_type_name=order.service_type_name,

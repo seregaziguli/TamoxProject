@@ -2,7 +2,7 @@ from src.utils.messaging import get_rabbitmq_connection
 from src.repositories.notification_repository import NotificationRepository
 from src.models.notification import Notification
 from typing import List
-from src.api.schemas.notification import NotificationResponse
+from src.api.schemas.notification import NotificationResponseDTO
 from src.utils.logger import logger
 import json
 
@@ -20,11 +20,11 @@ class NotificationService:
 
         return await self.notification_repository.create_notification(notification_data)
 
-    async def get_user_notifications(self, user_id: int) -> List[NotificationResponse]:
+    async def get_user_notifications(self, user_id: int) -> List[NotificationResponseDTO]:
         try:
             notifications = await self.notification_repository.get_user_notifications(user_id)
             return [
-                NotificationResponse(
+                NotificationResponseDTO(
                     id=notification.id,
                     user_id=user_id, 
                     message=notification.message,

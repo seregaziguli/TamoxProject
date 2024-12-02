@@ -1,6 +1,6 @@
 from src.services.order_service import OrderService
 from src.api.deps.order_deps import get_current_user, get_order_service, get_s3_client
-from src.api.schemas.order import OrderRequest, OrderResponse
+from src.api.schemas.order import OrderRequestDTO, OrderResponseDTO
 from src.utils.logger import logger
 from typing import List, Union
 from src.utils.logger import logger
@@ -18,16 +18,16 @@ order_router = APIRouter(
     tags=["Orders"],
 )
 
-@order_router.post("/", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
+@order_router.post("/", response_model=OrderResponseDTO, status_code=status.HTTP_201_CREATED)
 async def create_order(
-    order: Union[OrderRequest, str],
+    order: Union[OrderRequestDTO, str],
     user: dict = Depends(get_current_user),
     order_service: OrderService = Depends(get_order_service),
     image: UploadFile = File(None)
 ):
     if isinstance(order, str):
         try:
-            order = OrderRequest.model_validate_json(order)
+            order = OrderRequestDTO.model_validate_json(order)
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid input format: {str(e)}")
 
@@ -49,7 +49,7 @@ async def delete_order(
         raise HTTPException(status_code=500, detail="Could not delete order.")
 
     
-@order_router.get("/", response_model=List[OrderResponse], status_code=status.HTTP_200_OK)
+@order_router.get("/", response_model=List[OrderResponseDTO], status_code=status.HTTP_200_OK)
 async def get_user_orders(
     user: dict = Depends(get_current_user),
     order_service: OrderService = Depends(get_order_service)
@@ -62,7 +62,7 @@ async def get_user_orders(
         raise HTTPException(status_code=500, detail="Could not retrieve orders.")
     
 
-@order_router.get("/all", response_model=List[OrderResponse], status_code=status.HTTP_200_OK)
+@order_router.get("/all", response_model=List[OrderResponseDTO], status_code=status.HTTP_200_OK)
 @cache(expire=180)
 async def get_all_orders(
     order_service: OrderService = Depends(get_order_service)
@@ -93,7 +93,7 @@ async def get_notifications(
         raise HTTPException(status_code=500, detail="Internal server error.")
     
     
-@order_router.get("/{order_id}", response_model=OrderResponse, status_code=status.HTTP_200_OK)
+@order_router.get("/{order_id}", response_model=OrderResponseDTO, status_code=status.HTTP_200_OK)
 async def get_order_by_id(
     order_id: int,
     user: dict = Depends(get_current_user),
@@ -112,7 +112,7 @@ async def get_order_by_id(
         raise HTTPException(status_code=500, detail="Coult not retrieve order.")
     
 
-@order_router.post("/{order_id}/process", response_model=OrderResponse, status_code=status.HTTP_200_OK)
+@order_router.post("/{order_id}/process", response_model=OrderResponseDTO, status_code=status.HTTP_200_OK)
 async def process_order(
     order_id: int,
     user: dict = Depends(get_current_user),
@@ -132,7 +132,7 @@ async def process_order(
         raise HTTPException(status_code=500, detail="Could not process order.")
     
     
-@order_router.put("/{order_id}", response_model=OrderResponse, status_code=status.HTTP_200_OK)
+@order_router.put("/{order_id}", response_model=OrderResponseDTO, status_code=status.HTTP_200_OK)
 async def update_order(
     order_id: int,
     order_data: dict,

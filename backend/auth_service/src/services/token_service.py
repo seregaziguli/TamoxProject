@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from src.models.user import User, UserToken
-from src.api.schemas.token import UserToken as UserTokenPydantic
 from src.core.security import hash_password, verify_password, generate_token, get_token_payload, str_encode, str_decode
 from src.repositories.user_repository import UserRepository
 from src.repositories.token_repository import TokenRepository

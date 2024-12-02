@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.user import User
-from src.api.schemas.token import UserToken as UserTokenPydantic
+from src.api.schemas.token import UserTokenDTO
 from src.core.security import verify_password
 from src.repositories.user_repository import UserRepository
 from src.core.config import settings
@@ -20,7 +20,7 @@ class AuthService:
         self.user_repo = user_repo
         self.token_service = token_service
 
-    async def authenticate_user(self, email: str, password: str) -> Optional[UserTokenPydantic]:
+    async def authenticate_user(self, email: str, password: str) -> Optional[UserTokenDTO]:
             user = await self.user_repo.get_user_by_email(email)
             if user and verify_password(password, user.password):
                 tokens = await self.token_service.generate_tokens(user)
@@ -29,7 +29,7 @@ class AuthService:
                 if not user_token:
                     raise HTTPException(status_code=400, detail="Token generation failed.")
                 
-                return UserTokenPydantic(
+                return UserTokenDTO(
                     id=user_token.id,
                     access_token=tokens["access_token"],
                     refresh_token=tokens["refresh_token"],

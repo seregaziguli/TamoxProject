@@ -1,7 +1,7 @@
 from datetime import datetime
 from src.api.schemas.base import BaseResponse
 
-class NotificationResponse(BaseResponse):
+class NotificationResponseDTO(BaseResponse):
     id: int
     user_id: int
     message: str

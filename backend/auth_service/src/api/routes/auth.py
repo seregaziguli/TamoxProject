@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.schemas.user import LoginResponse, RegisterUserRequest, RegisterUserResponse, User as UserPydantic, UserTokenPydantic
+from src.api.schemas.user import LoginResponseDTO, RegisterUserRequestDTO, RegisterUserResponseDTO, User as UserPydantic
 from src.api.deps.user_deps import get_current_user, get_async_session, get_auth_service
 from src.models.user import User as UserSQLAlchemy 
 from fastapi.exceptions import HTTPException
@@ -17,7 +17,7 @@ auth_router = APIRouter(
     responses={404: {"description": "Not found"}}
 )
 
-@auth_router.post("/login", response_model=LoginResponse) 
+@auth_router.post("/login", response_model=LoginResponseDTO) 
 async def user_login(data: OAuth2PasswordRequestForm = Depends(), auth_service: AuthService = Depends(get_auth_service)):
     logger.info("User login attempt for username: %s", data.username)
     token = await auth_service.authenticate_user(data.username, data.password)
@@ -27,7 +27,7 @@ async def user_login(data: OAuth2PasswordRequestForm = Depends(), auth_service: 
     logger.info("User logged in successfully: %s", data.username)
     return token
 
-@auth_router.post("/refresh", response_model=LoginResponse)
+@auth_router.post("/refresh", response_model=LoginResponseDTO)
 async def refresh_token(refresh_token: str = Header(), auth_service: AuthService = Depends(get_auth_service)):
     logger.info("Refreshing token for user with refresh token: %s", refresh_token)
     token = await auth_service.refresh_tokens(refresh_token)
@@ -56,9 +56,9 @@ async def verify_token(
 
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-@auth_router.post("", status_code=status.HTTP_201_CREATED, response_model=RegisterUserResponse) # this router accepts a post request from the registration service
+@auth_router.post("", status_code=status.HTTP_201_CREATED, response_model=RegisterUserResponseDTO) # this router accepts a post request from the registration service
 async def register_user(
-    data: RegisterUserRequest, 
+    data: RegisterUserRequestDTO, 
     session: AsyncSession = Depends(get_async_session),
     auth_service: AuthService = Depends(get_auth_service)
 ):

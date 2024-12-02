@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.deps.session import get_async_session
 from src.repositories.user_repository import UserRepository
 from src.services.user_service import UserService
-from src.api.schemas.user import RegisterUserRequest
 from src.api.deps.auth_service_deps import get_auth_service_client
 
 async def get_user_repository(session: AsyncSession = Depends(get_async_session)) -> UserRepository:

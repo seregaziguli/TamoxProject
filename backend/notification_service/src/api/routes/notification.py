@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi import Depends, HTTPException
 from src.api.deps.notification_deps import get_notification_service
-from src.api.schemas.notification import NotificationResponse
+from src.api.schemas.notification import NotificationResponseDTO
 from src.services.notification_service import NotificationService
 from typing import List
 from src.utils.logger import logger
@@ -12,7 +12,7 @@ notification_router = APIRouter(
     responses={404: {"description": "Not found"}}
 )
 
-@notification_router.get("/{user_id}", response_model=List[NotificationResponse])
+@notification_router.get("/{user_id}", response_model=List[NotificationResponseDTO])
 async def get_notifications_by_user_id(
     user_id: int, 
     notification_service: NotificationService = Depends(get_notification_service)

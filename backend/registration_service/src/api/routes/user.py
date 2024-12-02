@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.api.schemas.user import RegisterUserRequest, UserResponse
+from src.api.schemas.user import RegisterUserRequestDTO, UserResponseDTO
 from src.services.user_service import UserService
 from src.repositories.user_repository import UserRepository
 from src.api.deps.auth_service_deps import get_auth_service_client
@@ -13,15 +13,15 @@ user_router = APIRouter(
     responses={404: {"description": "Not found"}}
 )
 
-@user_router.post("", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
+@user_router.post("", status_code=status.HTTP_201_CREATED, response_model=UserResponseDTO)
 async def register_user(
-    data: RegisterUserRequest,
+    data: RegisterUserRequestDTO,
     user_service: UserService = Depends(get_user_service)
 ):
 
     try:
         new_user = await user_service.register_user(data)
-        return UserResponse(**new_user.to_dict())
+        return UserResponseDTO(**new_user.to_dict())
     except HTTPException as http_exc:
         raise http_exc
     except Exception as exc:
