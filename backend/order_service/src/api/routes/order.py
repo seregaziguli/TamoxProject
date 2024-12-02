@@ -1,7 +1,7 @@
 from src.services.order_service import OrderService
 from src.api.deps.order_deps import get_current_user, get_order_service, get_s3_client
 from src.api.schemas.order import OrderRequest, OrderResponse
-import logging
+from src.utils.logger import logger
 from typing import List, Union
 from src.utils.logger import logger
 from fastapi.exceptions import HTTPException
@@ -105,7 +105,7 @@ async def get_order_by_id(
             raise HTTPException(status_code=404, detail="Order not found.")
         return order
     except HTTPException as e:
-        logging.error(f"Error retrieving order: {e}")
+        logger.error(f"Error retrieving order: {e}")
         raise e
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
@@ -125,7 +125,7 @@ async def process_order(
         logger.info("In function 2")
         return order
     except HTTPException as e:
-        logging.error(f"Error processing order: {e}")
+        logger.error(f"Error processing order: {e}")
         raise e
     except Exception as e:
         logger.error(f"Unexpected error: {e}")

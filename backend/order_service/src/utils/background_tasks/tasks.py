@@ -2,7 +2,7 @@ import asyncio
 from taskiq_redis import ListQueueBroker, RedisAsyncResultBackend
 import os
 from src.services.s3_service import s3_client
-import logging
+from src.utils.logger import logger
 import base64
 
 redis_async_result = RedisAsyncResultBackend(
@@ -12,9 +12,6 @@ redis_async_result = RedisAsyncResultBackend(
 broker = ListQueueBroker(url="redis://redis:6379")
 
 broker = broker.with_result_backend(redis_async_result)
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 @broker.task
 async def upload_image_task(encoded_file_content: str, object_name: str) -> str:

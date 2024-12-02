@@ -1,7 +1,5 @@
 import httpx
-import logging
-
-logger = logging.getLogger(__name__)
+from src.utils.logger import logger
 
 class OrderManagementRepository:
     def __init__(self, base_url: str):
@@ -17,7 +15,7 @@ class OrderManagementRepository:
             logger.error(f"Failed to fetch order with ID {order_id}. HTTP status: {e.response.status_code}")
             raise
         except Exception as e:
-            logging.error(f"Error fetching order with ID {order_id}: {str(e)}")
+            logger.error(f"Error fetching order with ID {order_id}: {str(e)}")
             raise
 
     async def update_order(self, order_id: int, order_data: dict) -> None:
@@ -30,7 +28,7 @@ class OrderManagementRepository:
             logger.error(f"Failed to update order with ID {order_id}. HTTP status: {e.response.status_code}")
             raise
         except Exception as e:
-            logging.error(f"Error updating order with ID {order_id}: {str(e)}")
+            logger.error(f"Error updating order with ID {order_id}: {str(e)}")
             raise
 
     async def process_order(self, order_id: int) -> dict:

@@ -3,11 +3,8 @@ from src.repositories.user_repository import UserRepository
 from src.api.schemas.user import RegisterUserRequest
 from src.core.security import hash_password
 import httpx
-import logging
+from src.utils.logger import logger
 from src.services.auth_service_client import AuthServiceClient
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('socketio')
 
 class UserService:
     def __init__(self, user_repository: UserRepository, auth_service_client: AuthServiceClient):

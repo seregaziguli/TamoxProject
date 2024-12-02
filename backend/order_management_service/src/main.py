@@ -3,15 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 import asyncio
-import logging
+from src.utils.logger import logger
 from src.services.order_management_service import OrderManagementService
 from src.repositories.order_management_repository import OrderManagementRepository
 from src.handlers.order_handler import RabbitMQConsumer 
 from src.core.config import settings
 from src.api.routes.healthcheck import healthcheck_router
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 order_management_repository = OrderManagementRepository(base_url=settings().ORDER_SERVICE_URL)
 order_management_service = OrderManagementService(order_management_repository=order_management_repository)

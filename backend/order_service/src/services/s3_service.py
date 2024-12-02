@@ -1,6 +1,6 @@
 import asyncio
 from contextlib import asynccontextmanager
-import logging
+from src.utils.logger import logger
 import os
 from aiobotocore.session import get_session
 from botocore.exceptions import ClientError

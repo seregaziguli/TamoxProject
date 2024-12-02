@@ -1,4 +1,4 @@
-import logging
+from src.utils.logger import logger
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import jwt
@@ -13,7 +13,6 @@ from sqlalchemy.future import select
 from src.models.user import User
 from sqlalchemy import select
 
-logger = logging.getLogger('uvicorn.error')
 SPECIAL_CHARACTERS = ['@', '#', '$', '%', '=', ':', '?', '.', '/', '|', '~', '>']
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login") # The endpoint where the user can get a token
