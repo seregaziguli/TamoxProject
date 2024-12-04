@@ -184,7 +184,7 @@ services:
       dockerfile: Dockerfile
     container_name: taskiq_worker
     environment:
-      - TASKIQ_BROKER=redis://redis:6379 
+      - TASKIQ_BROKER=redis://redis_app:6379 
     depends_on:
       - redis
     command: ["taskiq", "worker", "src.utils.background_tasks.tasks:broker"]

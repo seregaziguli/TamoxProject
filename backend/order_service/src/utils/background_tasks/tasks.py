@@ -6,10 +6,10 @@ from src.utils.logger import logger
 import base64
 
 redis_async_result = RedisAsyncResultBackend(
-    redis_url="redis://redis:6379",
+    redis_url="redis://redis_app:6379",  # redis://redis_app:6379
 )
 
-broker = ListQueueBroker(url="redis://redis:6379")
+broker = ListQueueBroker(url="redis://redis_app:6379")
 
 broker = broker.with_result_backend(redis_async_result)
 

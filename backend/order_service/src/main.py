@@ -10,7 +10,7 @@ from redis import asyncio as aioredis
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    redis = aioredis.from_url("redis://localhost:6379/0")
+    redis = aioredis.from_url("redis://redis_app:6379/0")
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     yield
 
@@ -20,6 +20,7 @@ origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
