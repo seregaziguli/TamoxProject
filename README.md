@@ -1,3 +1,5 @@
+# Tamox
+
 Tamox is a project designed for completing simple tasks for which clients can get paid by customers. The project is built using a microservice architecture and includes several services for user registration, order processing, and notifications.
 
 ## Core Features:
