@@ -9,7 +9,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(150), nullable=False)
-    phone_number = Column(String, nullable=False)
+    phone_number = Column(String, nullable=False, index=True)
     email = Column(String(255), unique=True, index=True, nullable=False)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
 

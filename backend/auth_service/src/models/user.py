@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm import selectinload
 from src.db.session import Base
 
 class User(Base):
@@ -28,7 +28,7 @@ class UserToken(Base):
     __tablename__ = "user_tokens"
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users_auth.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('users_auth.id'), nullable=False, index=True)
     access_token = Column(String(250), nullable=True, index=True)
     refresh_token = Column(String(250), nullable=True, index=True)
     expires_at = Column(DateTime, nullable=False)
