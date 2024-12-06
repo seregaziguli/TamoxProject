@@ -1,6 +1,6 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from src.services.chat_service import ChatService
-from src.api.deps.chat_deps import get_chat_service, get_current_user
+from src.api.deps.chat_deps import get_chat_service, get_current_user, get_access_token_from_url
 from src.api.schemas.chat import MessageCreate
 from typing import Dict
 
@@ -14,7 +14,8 @@ active_connections = Dict[int, WebSocket]
 @chat_router.websocket("/ws/chat")
 async def chat_websocket(
     websocket: WebSocket,
-    current_user: dict = Depends(get_current_user),
+    token: str = Depends(get_access_token_from_url),
+    current_user: dict = Depends(get_current_user), 
     chat_service: ChatService = Depends(get_chat_service),
 ):
     user_id = current_user["id"]

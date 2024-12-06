@@ -2,16 +2,16 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import userDefaultPfp from "../../../assets/images/userDefaultPfp.png";
-import './Chat.css'
+import "./Chat.css";
 
 const Chat = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const ws = useRef(null); 
+  const ws = useRef(null);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -25,10 +25,18 @@ const Chat = () => {
     fetchUsers();
   }, []);
 
-
   useEffect(() => {
     if (selectedUser) {
-      ws.current = new WebSocket(`ws://localhost:8009/chat/ws/chat`);
+      const accessToken = localStorage.getItem("access_token");
+      if (!accessToken) {
+        console.error("Access token is missing");
+        return;
+      }
+
+      const socketUrl = `ws://localhost:8009/chat/ws/chat?access_token=${accessToken}`;
+      console.log("access token:", accessToken);
+      
+      ws.current = new WebSocket(socketUrl);
 
       ws.current.onopen = () => {
         console.log("Connected to WebSocket!");
@@ -49,7 +57,7 @@ const Chat = () => {
       };
     }
   }, [selectedUser]);
-  
+
   const handleSendMessage = () => {
     if (newMessage.trim() === "" || !selectedUser) return;
 
@@ -59,13 +67,14 @@ const Chat = () => {
     };
 
     ws.current.send(JSON.stringify(messageData));
-    setNewMessage(""); 
+    setNewMessage("");
   };
 
   return (
     <div>
       <div className="user-list">
         <h2>Select a User to Chat</h2>
+        <div>test str</div>
         <ul>
           {users.map((user) => (
             <li

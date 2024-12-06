@@ -4,12 +4,23 @@ from src.repositories.chat_repository import ChatRepository
 from src.services.chat_service import ChatService
 from fastapi import Depends
 from src.utils.user import verify_user
+from fastapi import WebSocket, Depends, HTTPException
+from src.services.chat_service import ChatService
+from urllib.parse import parse_qs
 
 async def get_current_user(user: dict = Depends(verify_user)) -> dict:
     return user
 
-async def get_chat_reporitory(session: AsyncSession = Depends(get_async_session)) -> ChatRepository:
+async def get_chat_repository(session: AsyncSession = Depends(get_async_session)) -> ChatRepository:
     return ChatRepository(session)
 
-async def get_chat_service(chat_repository: ChatRepository = Depends(get_chat_reporitory)) -> ChatService:
+async def get_chat_service(chat_repository: ChatRepository = Depends(get_chat_repository)) -> ChatService:
     return ChatService(chat_repository=chat_repository)
+
+async def get_access_token_from_url(websocket: WebSocket) -> str:
+    url = websocket.url
+    query_params = parse_qs(url.query)
+    token = query_params.get("access_token", [None])[0]
+    if not token:
+        raise HTTPException(status_code=401, detail="Authorization token missing")
+    return token
