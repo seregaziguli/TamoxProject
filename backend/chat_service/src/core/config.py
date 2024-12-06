@@ -12,8 +12,6 @@ class Settings(BaseSettings):
     DB_PASS: str
     ACCESS_KEY: str
     SECRET_KEY: str
-    ENDPOINT_URL: str
-    BUCKET_NAME: str
     RABBITMQ_URL: str
     NOTIFICATION_SERVICE_URL: str
     AUTH_SERVICE_URL: str
