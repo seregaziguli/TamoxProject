@@ -9,6 +9,9 @@ class UserResponseDTO(BaseResponse):
     name: str
     phone_number: str
     created_at: Optional[str]
+
+    class Config:
+        orm_mode = True
     
 class RegisterUserRequestDTO(BaseResponse):
     name: str

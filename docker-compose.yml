@@ -79,6 +79,80 @@ services:
     networks:
       - app_network
 
+  order_management_service:
+    build:
+      context: ./backend/order_management_service
+      dockerfile: Dockerfile
+    container_name: order_management_service
+    depends_on:
+      - rabbitmq
+      - order_service
+    environment:
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_PORT: "5672"
+      ORDER_SERVICE_URL: "http://order_service:8002"
+    networks:
+      - app_network
+
+  notification_service:
+    build:
+      context: ./backend/notification_service
+      dockerfile: Dockerfile
+    command: ["./scripts/start.sh"]
+    container_name: notification_service
+    ports:
+      - "8008:8000"
+    networks:
+      - app_network
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASS: "34tgw3eg"
+      POSTGRES_DB: "notification_service_db"
+      POSTGRES_HOST: "notification_db"
+      POSTGRES_PORT: "5432"
+    depends_on:
+      notification_db:
+        condition: service_healthy
+
+  chat_service:
+    build:
+      context: ./backend/chat_service
+      dockerfile: Dockerfile
+    command: ["./scripts/start.sh"]
+    container_name: chat_service
+    ports:
+      - "8009:8000"
+    depends_on:
+      chat_db:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASS: "34tgw3eg"
+      POSTGRES_DB: "chat_service_db"
+      POSTGRES_HOST: "chat_db"
+      POSTGRES_PORT: "5432"
+    networks:
+      - app_network
+
+  chat_db:
+    image: postgres:14
+    networks:
+      - app_network
+    ports:
+      - "5441:5432"
+    volumes:
+      - chat_db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASS: "34tgw3eg"
+      POSTGRES_DB: "chat_service_db"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "chat_service_db", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   auth_db:
     image: postgres:14
     networks:
@@ -135,40 +209,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  
-  order_management_service:
-    build:
-      context: ./backend/order_management_service
-      dockerfile: Dockerfile
-    container_name: order_management_service
-    depends_on:
-      - rabbitmq
-      - order_service
-    environment:
-      RABBITMQ_HOST: "rabbitmq"
-      RABBITMQ_PORT: "5672"
-      ORDER_SERVICE_URL: "http://order_service:8002"
-    networks:
-      - app_network
-
-  notification_service:
-    build:
-      context: ./backend/notification_service
-      dockerfile: Dockerfile
-    container_name: notification_service
-    ports:
-      - "8008:8000"
-    networks:
-      - app_network
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASS: "34tgw3eg"
-      POSTGRES_DB: "notification_service_db"
-      POSTGRES_HOST: "notification_db"
-      POSTGRES_PORT: "5432"
-    depends_on:
-      notification_db:
-        condition: service_healthy
 
   notification_db:
     image: postgres:14
@@ -253,3 +293,4 @@ volumes:
   order_db_data:
   rabbitmq_data:
   notification_db_data:
+  chat_db_data:

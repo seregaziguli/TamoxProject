@@ -1,7 +1,7 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from src.services.chat_service import ChatService
 from src.api.deps.chat_deps import get_chat_service, get_current_user
-from src.models import MessageCreate
+from src.api.schemas.chat import MessageCreate
 from typing import Dict
 
 chat_router = APIRouter(

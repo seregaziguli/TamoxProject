@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-# from src.models.
+from src.models.message import Message
 from src.db.session import metadata
 from src.core.config import settings
 

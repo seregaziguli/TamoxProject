@@ -1,23 +1,60 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Link } from "react-router-dom";
 import "./Header.css";
-import axios from "axios";
 import userDefaultPfp from "../../../assets/images/userDefaultPfp.png";
-import logo from "../../../assets/images/logo.png";
+import Chat from "../Chat/Chat";
 
 export default function Header() {
   const [isPfpPopUpOpen, setIsPfpPopUpOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState(userDefaultPfp);
   const [isExitWindowOpen, setIsExitWindowOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const accessToken = localStorage.getItem("access_token");
+
+      if (!accessToken) {
+        console.error("Access token not found");
+        return;
+      }
+
+      try {
+        const response = await axios.get("http://localhost:8005/users/me", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`, 
+          },
+        });
+        setUserId(response.data.id); 
+      } catch (error) {
+        console.error("Error fetching user ID:", error);
+      }
+    };
+
+    fetchUserId();
+  }, []);
 
   const handleExitClick = () => {
     setIsExitWindowOpen(true);
   };
 
+  const handleMessagesClick = () => {
+    setIsChatOpen(!isChatOpen);
+  };
+
   return (
     <>
       <div className="header-wrapper bg-[#f8f8f8] h-24 w-full flex justify-between pr-20 pl-20 items-center space-x-10">
+        <div>
+          {userId ? (
+            <div className="user-id-display">User ID: {userId}</div>
+          ) : (
+            <div className="user-id-loading">Loading user ID...</div>
+          )}
+        </div>
+
         <Link to={"/orders"}>
           <div>Make an order</div>
         </Link>
@@ -51,7 +88,7 @@ export default function Header() {
                 <div className="mb-4 cursor-pointer">Notifications</div>
               </Link>
 
-              <Link to="/">
+              <Link to="#" onClick={handleMessagesClick}>
                 <div className="mb-4 cursor-pointer">Messages</div>
               </Link>
 
@@ -66,6 +103,8 @@ export default function Header() {
           </div>
         )}
       </div>
+
+      {isChatOpen && <Chat />}
     </>
   );
 }

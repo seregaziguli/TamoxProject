@@ -3,7 +3,7 @@ FROM python:3.12
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./src /app/src
 COPY ./scripts/start.sh /app/scripts/start.sh
@@ -12,5 +12,7 @@ COPY ./migrations /app/migrations
 COPY .env /app/.env
 
 RUN chmod +x /app/scripts/start.sh
+
+EXPOSE 8000
 
 CMD ["/app/scripts/start.sh"]

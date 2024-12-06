@@ -37,5 +37,8 @@ class UserService:
             raise HTTPException(status_code=500, detail='Failed to create account')
 
         return new_user
+    
+    async def get_all_users(self):
+        return await self.user_repository.get_all_users()
         
         
