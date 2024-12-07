@@ -18,6 +18,15 @@ async def get_chat_repository(session: AsyncSession = Depends(get_async_session)
 async def get_chat_service(chat_repository: ChatRepository = Depends(get_chat_repository)) -> ChatService:
     return ChatService(chat_repository=chat_repository)
 
+
+
+
+
+
+
+
+
+
 async def get_access_token_from_url(websocket: WebSocket) -> str:
     url = websocket.url
     url = urlparse(str(websocket.url))

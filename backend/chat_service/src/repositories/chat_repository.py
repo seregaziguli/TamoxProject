@@ -1,6 +1,7 @@
 from sqlalchemy.future import select
 from src.models.message import Message
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.utils.logger import logger
 
 class ChatRepository:
     def __init__(self, db: AsyncSession):
@@ -11,6 +12,7 @@ class ChatRepository:
         self.db.add(message)
         await self.db.commit()
         await self.db.refresh(message)
+        logger.info("here repo 1")
         return message
     
     async def get_messages_for_user(self, user_id: int):

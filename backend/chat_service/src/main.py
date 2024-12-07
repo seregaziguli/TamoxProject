@@ -2,8 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.socket_manager import create_socket_manager_app
 import socketio
+from src.utils.logger import logger
 
 app = FastAPI()
+
+logger.info("Socket.IO server is running 1")
 
 origins = [
     "http://localhost:5173",
@@ -29,6 +32,8 @@ sio_app = socketio.ASGIApp(
     socketio_server=sio_server,
     socketio_path='sockets'
 )
+
+logger.info("Socket.IO server is running 2")
 
 app.mount("/sockets", sio_app, name="sockets")
 

@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.api.routes import auth
+from src.utils.logger import logger
 
 app = FastAPI()
 
@@ -20,3 +21,5 @@ app.add_middleware(
 )
 
 app.include_router(auth.auth_router)
+
+logger.info("auth server is running 1")

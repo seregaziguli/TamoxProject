@@ -5,16 +5,18 @@ import userDefaultPfp from "../../../assets/images/userDefaultPfp.png";
 import "./Chat.css";
 
 const Chat = () => {
+  console.log("here -1")
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [socket, setSocket] = useState(null);
-
+  console.log("here 0");
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get("http://localhost:8006/users/all");
+        console.log("here 1");
         setUsers(response.data);
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -26,19 +28,21 @@ const Chat = () => {
 
   useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
+    console.log("here 2");
     if (!accessToken) {
       console.error("Access token is missing");
       return;
     }
-
+    console.log("here 3");
     const socketInstance = io("http://localhost:8009", {
-      path: "sockets", 
+      path: "/sockets",
       extraHeaders: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    
+    console.log("socket instance:", socketInstance);
 
+    console.log("here 4");
     socketInstance.on("connect", () => {
       console.log("Connected to Socket.IO!");
     });
@@ -49,6 +53,7 @@ const Chat = () => {
         { from_user_id: message.from_user_id, content: message.content },
       ]);
     });
+    console.log("here 5");
 
     socketInstance.on("disconnect", () => {
       console.log("Socket.IO disconnected");
@@ -57,6 +62,7 @@ const Chat = () => {
     setSocket(socketInstance);
 
     return () => {
+      console.log("here 6");
       if (socketInstance) {
         socketInstance.disconnect();
       }
@@ -64,6 +70,7 @@ const Chat = () => {
   }, []);
 
   const handleSendMessage = () => {
+    console.log("here 7");
     if (newMessage.trim() === "" || !selectedUser) return;
 
     const messageData = {
@@ -78,13 +85,14 @@ const Chat = () => {
       { from_user_id: "me", content: newMessage },
     ]);
     setNewMessage("");
+    console.log("here 8");
   };
 
   return (
     <div>
       <div className="user-list">
         <h2>Select a User to Chat</h2>
-        <div>test str 8</div>
+        <div>test str 10</div>
         <ul>
           {users.map((user) => (
             <li
