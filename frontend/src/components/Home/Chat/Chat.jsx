@@ -33,10 +33,10 @@ const Chat = () => {
         return;
       }
 
-      const socketUrl = `ws://localhost:8009/chat/ws/chat?access_token=${accessToken}`;
-      console.log("access token:", accessToken);
-      
-      ws.current = new WebSocket(socketUrl);
+      const wsUrl = new URL("ws://localhost:8009/chat/ws/chat");
+      wsUrl.searchParams.append("access_token", accessToken);
+
+      ws.current = new WebSocket(wsUrl.toString());
 
       ws.current.onopen = () => {
         console.log("Connected to WebSocket!");
@@ -48,6 +48,14 @@ const Chat = () => {
           ...prevMessages,
           { from_user_id: message.from_user_id, content: message.content },
         ]);
+      };
+
+      ws.current.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+
+      ws.current.onclose = () => {
+        console.log("WebSocket connection closed.");
       };
 
       return () => {
@@ -74,7 +82,7 @@ const Chat = () => {
     <div>
       <div className="user-list">
         <h2>Select a User to Chat</h2>
-        <div>test str</div>
+        <div>test str 3</div>
         <ul>
           {users.map((user) => (
             <li
