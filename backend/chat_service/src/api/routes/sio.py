@@ -20,7 +20,7 @@ def log_active_connections():
 
 @sio_server.event
 async def connect(sid, environ):
-    logger.info("a_11")
+    logger.info("in connect func")
     access_token = environ["HTTP_AUTHORIZATION"].split(" ")[1] if "HTTP_AUTHORIZATION" in environ else None
     if not access_token:
         logger.error(f"Access token missing for SID {sid}")
@@ -39,7 +39,8 @@ async def connect(sid, environ):
 
 @sio_server.event
 async def send_message(sid, data):
-    logger.info("a_22")
+    logger.info("in send message func")
+    logger.info(f"Received data: {data}")
     access_token = None
     if "HTTP_AUTHORIZATION" in sio_server.environ[sid]:
         access_token = sio_server.environ[sid]["HTTP_AUTHORIZATION"].split(" ")[1]
@@ -87,7 +88,7 @@ async def send_message(sid, data):
 
 @sio_server.event
 async def disconnect(sid):
-    logger.info("a_33")
+    logger.info("in disconnect func")
     user_id = next((key for key, value in active_connections.items() if value == sid), None)
     if user_id:
         active_connections.pop(user_id)

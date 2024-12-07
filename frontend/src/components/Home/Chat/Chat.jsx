@@ -5,13 +5,15 @@ import userDefaultPfp from "../../../assets/images/userDefaultPfp.png";
 import "./Chat.css";
 
 const Chat = () => {
-  console.log("here -1")
+  console.log("here -1");
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [socket, setSocket] = useState(null);
+  const [userId, setUserId] = useState(null); 
   console.log("here 0");
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -24,6 +26,29 @@ const Chat = () => {
     };
 
     fetchUsers();
+  }, []);
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const accessToken = localStorage.getItem("access_token");
+      if (!accessToken) {
+        console.error("Access token is missing");
+        return;
+      }
+      try {
+        const response = await axios.get("http://localhost:8005/users/me", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        console.log("Current user data:", response.data);
+        setUserId(response.data.id);  // Set the user ID
+      } catch (error) {
+        console.error("Error fetching current user data:", error);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   useEffect(() => {
@@ -52,6 +77,7 @@ const Chat = () => {
         ...prevMessages,
         { from_user_id: message.from_user_id, content: message.content },
       ]);
+      console.log("here 9");
     });
     console.log("here 5");
 
@@ -69,20 +95,26 @@ const Chat = () => {
     };
   }, []);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     console.log("here 7");
-    if (newMessage.trim() === "" || !selectedUser) return;
+    if (newMessage.trim() === "" || !selectedUser || !userId) return; 
 
     const messageData = {
+      from_user_id: userId, 
       to_user_id: selectedUser.id,
       content: newMessage,
     };
 
+    console.log("Emitting send_message with data:", messageData);
+    console.log("socket:", socket);
+
     socket.emit("send_message", messageData);
+
+    console.log("emitted");
 
     setMessages((prevMessages) => [
       ...prevMessages,
-      { from_user_id: "me", content: newMessage },
+      { from_user_id: userId, content: newMessage }, 
     ]);
     setNewMessage("");
     console.log("here 8");
@@ -117,7 +149,7 @@ const Chat = () => {
             {messages.map((message, index) => (
               <div key={index} className="message">
                 <strong>
-                  {message.from_user_id === "me" ? "You" : "Other"}
+                  {message.from_user_id === userId ? "You" : "Other"}
                 </strong>
                 : {message.content}
               </div>
