@@ -6,11 +6,11 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import Login from "./components/Form/Login/Login";
-import Register from "./components/Form/Register/Register";
-import Home from "./components/Home/Home";
-import MyProfile from "./components/Home/MyProfile/MyProfile";
-import OrderForm from "./components/Home/OrderForm/OrderForm";
+import Login from "./components/Form/Login/Login.jsx";
+import Register from "./components/Form/Register/Register.jsx";
+import Home from "./components/Home/Home.jsx";
+import MyProfile from "./components/Home/MyProfile/MyProfile.jsx";
+import OrderForm from "./components/Home/OrderForm/OrderForm.jsx";
 
 export default function App() {
   const [token, setToken] = useState();

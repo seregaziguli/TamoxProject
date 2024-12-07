@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import "./Header.css";
 import userDefaultPfp from "../../../assets/images/userDefaultPfp.png";
-import Chat from "../Chat/Chat";
+import Chat from "../Chat/Chat.jsx";
 
 export default function Header() {
   const [isPfpPopUpOpen, setIsPfpPopUpOpen] = useState(false);

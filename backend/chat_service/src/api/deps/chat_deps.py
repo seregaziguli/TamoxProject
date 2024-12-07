@@ -8,7 +8,6 @@ from src.utils.user import verify_user
 from fastapi import WebSocket, Depends, HTTPException
 from src.services.chat_service import ChatService
 from urllib.parse import urlparse, parse_qs
-from fastapi_socketio import SocketManager
 
 async def get_current_user(user: dict = Depends(verify_user)) -> dict:
     return user
@@ -18,9 +17,6 @@ async def get_chat_repository(session: AsyncSession = Depends(get_async_session)
 
 async def get_chat_service(chat_repository: ChatRepository = Depends(get_chat_repository)) -> ChatService:
     return ChatService(chat_repository=chat_repository)
-
-async def get_sio(sio: SocketManager = Depends()):
-    return sio
 
 async def get_access_token_from_url(websocket: WebSocket) -> str:
     url = websocket.url

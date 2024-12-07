@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.socket_manager import create_socket_manager_app
+import socketio
 
 app = FastAPI()
 
@@ -10,7 +11,7 @@ origins = [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
 ]
-    
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -19,4 +20,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-sio = create_socket_manager_app(app)
+sio_server = socketio.AsyncServer(
+    async_mode='asgi',
+    cors_allowed_origins=[]
+)
+
+sio_app = socketio.ASGIApp(
+    socketio_server=sio_server,
+    socketio_path='sockets'
+)
+
+app.mount("/sockets", sio_app, name="sockets")
+

@@ -1,5 +1,5 @@
-from fastapi_socketio import SocketManager
+import socketio
 
-def create_socket_manager_app(app):
-    sio = SocketManager(app, path="/chat/ws/chat")
+def create_socket_manager_app():
+    sio = socketio.AsyncServer(cors_allowed_origins="*", path="/socket.io")
     return sio

@@ -32,11 +32,12 @@ const Chat = () => {
     }
 
     const socketInstance = io("http://localhost:8009", {
-      path: "/chat/ws/",
+      path: "sockets", 
       extraHeaders: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
+    
 
     socketInstance.on("connect", () => {
       console.log("Connected to Socket.IO!");
@@ -71,6 +72,7 @@ const Chat = () => {
     };
 
     socket.emit("send_message", messageData);
+
     setMessages((prevMessages) => [
       ...prevMessages,
       { from_user_id: "me", content: newMessage },
@@ -82,7 +84,7 @@ const Chat = () => {
     <div>
       <div className="user-list">
         <h2>Select a User to Chat</h2>
-        <div>test str 5</div>
+        <div>test str 8</div>
         <ul>
           {users.map((user) => (
             <li
