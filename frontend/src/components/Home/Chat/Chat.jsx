@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import userDefaultPfp from "../../../assets/images/userDefaultPfp.png";
 import "./Chat.css";
 
@@ -9,8 +9,7 @@ const Chat = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const ws = useRef(null);
-  const navigate = useNavigate();
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -26,45 +25,42 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedUser) {
-      const accessToken = localStorage.getItem("access_token");
-      if (!accessToken) {
-        console.error("Access token is missing");
-        return;
-      }
-
-      const wsUrl = new URL("ws://localhost:8009/chat/ws/chat");
-      wsUrl.searchParams.append("access_token", accessToken);
-
-      ws.current = new WebSocket(wsUrl.toString());
-
-      ws.current.onopen = () => {
-        console.log("Connected to WebSocket!");
-      };
-
-      ws.current.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { from_user_id: message.from_user_id, content: message.content },
-        ]);
-      };
-
-      ws.current.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
-
-      ws.current.onclose = () => {
-        console.log("WebSocket connection closed.");
-      };
-
-      return () => {
-        if (ws.current) {
-          ws.current.close();
-        }
-      };
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      console.error("Access token is missing");
+      return;
     }
-  }, [selectedUser]);
+
+    const socketInstance = io("http://localhost:8009", {
+      path: "/chat/ws/",
+      extraHeaders: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    socketInstance.on("connect", () => {
+      console.log("Connected to Socket.IO!");
+    });
+
+    socketInstance.on("receive_message", (message) => {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { from_user_id: message.from_user_id, content: message.content },
+      ]);
+    });
+
+    socketInstance.on("disconnect", () => {
+      console.log("Socket.IO disconnected");
+    });
+
+    setSocket(socketInstance);
+
+    return () => {
+      if (socketInstance) {
+        socketInstance.disconnect();
+      }
+    };
+  }, []);
 
   const handleSendMessage = () => {
     if (newMessage.trim() === "" || !selectedUser) return;
@@ -74,7 +70,11 @@ const Chat = () => {
       content: newMessage,
     };
 
-    ws.current.send(JSON.stringify(messageData));
+    socket.emit("send_message", messageData);
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { from_user_id: "me", content: newMessage },
+    ]);
     setNewMessage("");
   };
 
@@ -82,7 +82,7 @@ const Chat = () => {
     <div>
       <div className="user-list">
         <h2>Select a User to Chat</h2>
-        <div>test str 3</div>
+        <div>test str 5</div>
         <ul>
           {users.map((user) => (
             <li
@@ -107,7 +107,7 @@ const Chat = () => {
             {messages.map((message, index) => (
               <div key={index} className="message">
                 <strong>
-                  {message.from_user_id === selectedUser.id ? "You" : "Other"}
+                  {message.from_user_id === "me" ? "You" : "Other"}
                 </strong>
                 : {message.content}
               </div>

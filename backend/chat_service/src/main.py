@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.api.routes import chat_router
+from src.socket_manager import create_socket_manager_app
 
 app = FastAPI()
 
@@ -10,7 +10,7 @@ origins = [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
 ]
-
+    
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -19,4 +19,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(chat_router.chat_router)
+sio = create_socket_manager_app(app)

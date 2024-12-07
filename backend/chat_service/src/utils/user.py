@@ -18,3 +18,5 @@ async def verify_user(access_token: str = Header(...)):
             logger.error(f"Error verifying user: {str(e)}")
             raise HTTPException(status_code=401, detail=str(e))
         
+
+    

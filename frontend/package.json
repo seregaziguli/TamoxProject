@@ -16,7 +16,8 @@
     "react-router-dom": "^6.26.2",
     "react-select": "^5.8.1",
     "react-spring": "^9.7.4",
-    "react-toastify": "^10.0.5"
+    "react-toastify": "^10.0.5",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

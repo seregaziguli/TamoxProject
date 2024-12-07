@@ -1,39 +1,45 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
-from src.services.chat_service import ChatService
-from src.api.deps.chat_deps import get_chat_service, get_current_user, get_access_token_from_url, get_access_token_from_headers
-from src.api.schemas.chat import MessageCreate
-from typing import Dict
+from fastapi import APIRouter, Depends
 from src.utils.logger import logger
+from src.api.deps.chat_deps import get_current_user
+from src.services.chat_service import ChatService
+from src.api.schemas.chat import MessageCreate
+from src.socket_manager import sio  
+from src.api.deps.chat_deps import get_chat_service
 
-chat_router = APIRouter(
-    prefix="/chat",
-    tags=["Chat"],
-)
+active_connections = {}
 
-active_connections = Dict[int, WebSocket]
-
-@chat_router.websocket("/ws/chat")
-async def chat_websocket(
-    websocket: WebSocket,
-    token: str = Depends(get_access_token_from_url), 
-    current_user: dict = Depends(get_current_user), 
-    chat_service: ChatService = Depends(get_chat_service),
-):
-    logger.info("just here 1")
+@sio.on("connect")
+async def connect(sid: str, environ, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
-    await websocket.accept()
-    active_connections[user_id] = websocket
+    active_connections[user_id] = sid
+    logger.info(f"User {user_id} connected with sid {sid}")
 
+@sio.on("send_message")
+async def send_message(
+    sid: str,
+    data: dict,
+    current_user: dict = Depends(get_current_user),
+    chat_service: ChatService = Depends(get_chat_service)
+):
     try:
-        while True:
-            data = await websocket.receive_json()
-            message_data = MessageCreate(**data)
-            logger.info("message data:", message_data)
-            await chat_service.send_message(user_id, message_data.to_user_id, message_data.content)
+        user_id = current_user["id"]
+        message_data = MessageCreate(**data)
+        
+        await chat_service.send_message(user_id, message_data.to_user_id, message_data.content)
 
-            if message_data.to_user_id in active_connections:
-                await active_connections[message_data.to_user_id].send_json(
-                    {"from_user_id": user_id, "content": message_data.content}
-                )
-    except WebSocketDisconnect:
-        active_connections.pop(user_id, None)
+        to_user_sid = active_connections.get(message_data.to_user_id)
+        if to_user_sid:
+            await sio.emit(
+                "receive_message",
+                {"from_user_id": user_id, "content": message_data.content},
+                to=to_user_sid,
+            )
+    except Exception as e:
+        logger.error(f"Error in send_message: {str(e)}")
+
+@sio.on("disconnect")
+async def disconnect(sid: str):
+    user_id = next((key for key, value in active_connections.items() if value == sid), None)
+    if user_id:
+        active_connections.pop(user_id)
+    logger.info(f"User {user_id} disconnected")
