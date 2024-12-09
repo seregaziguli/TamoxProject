@@ -80,7 +80,7 @@ export default function Login() {
         <div className="login-right-container flex flex-col items-center justify-center">
           <div className="login-right-content">
             <div className="text-center">
-              <div className="text-5xl font-bold">Welcome to Amox</div>
+              <div className="text-5xl font-bold">Welcome to Tamox</div>
               <div className="text-lg font-medium mt-2">
                 Please login into your account!
               </div>

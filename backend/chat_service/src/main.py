@@ -6,7 +6,7 @@ from src.utils.logger import logger
 
 app = FastAPI()
 
-logger.info("Socket.IO server is running 1")
+logger.info("socket.io server is running")
 
 origins = [
     "http://localhost:5173",
@@ -32,8 +32,6 @@ sio_app = socketio.ASGIApp(
     socketio_server=sio_server,
     socketio_path='sockets'
 )
-
-logger.info("Socket.IO server is running 2")
 
 app.mount("/sockets", sio_app, name="sockets")
 

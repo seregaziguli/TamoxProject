@@ -65,7 +65,7 @@ export default function Register() {
               className="w-96 text-center text-base mb-8 font-semibold text-gray-700 
                     tracking-wide cursor-pointer mx-auto"
             >
-              Welcome to Amox
+              Welcome to Tamox
             </p>
           </div>
           <form onSubmit={onSubmitHandler}>

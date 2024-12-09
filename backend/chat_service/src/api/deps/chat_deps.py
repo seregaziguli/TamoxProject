@@ -19,29 +19,3 @@ async def get_chat_service(chat_repository: ChatRepository = Depends(get_chat_re
     return ChatService(chat_repository=chat_repository)
 
 
-
-
-
-
-
-
-
-
-async def get_access_token_from_url(websocket: WebSocket) -> str:
-    url = websocket.url
-    url = urlparse(str(websocket.url))
-    query_params = parse_qs(url.query)
-
-    token = query_params.get("access_token", [None])[0]
-    logger.info(f"url: {url}; query params: {query_params}; token: {token}")
-    logger.info(f"just here 1")
-    if not token:
-        raise HTTPException(status_code=401, detail="Authorization token missing")
-    return token
-
-async def get_access_token_from_headers(websocket: WebSocket) -> str:
-    token = websocket.headers.get("Authorization")
-    if not token or not token.startswith("Bearer "):
-        logger.info("just here 2")
-        raise HTTPException(status_code=401, detail="Authorization token missing")
-    return token.split("Bearer ")[1]

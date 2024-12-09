@@ -13,14 +13,14 @@ from src.api.deps.session import get_async_session
 active_connections = {}
 
 def log_active_connections():
-    logger.info("Active connections: {}".format(active_connections))
+    logger.info("active connections: {}".format(active_connections))
     for user_id, sid in active_connections.items():
         rooms = sio_server.rooms(sid)
         logger.info(f"User {user_id} with SID {sid} is in rooms: {rooms}")
 
 @sio_server.event
 async def connect(sid, environ):
-    logger.info("in connect func")
+    logger.info("in connect function")
     access_token = environ["HTTP_AUTHORIZATION"].split(" ")[1] if "HTTP_AUTHORIZATION" in environ else None
     if not access_token:
         logger.error(f"Access token missing for SID {sid}")
@@ -39,8 +39,8 @@ async def connect(sid, environ):
 
 @sio_server.event
 async def send_message(sid, data):
-    logger.info("in send message func")
-    logger.info(f"Received data: {data}")
+    logger.info("in send_message function")
+    logger.info(f"received data: {data}")
     access_token = None
     if "HTTP_AUTHORIZATION" in sio_server.environ[sid]:
         access_token = sio_server.environ[sid]["HTTP_AUTHORIZATION"].split(" ")[1]
@@ -88,7 +88,7 @@ async def send_message(sid, data):
 
 @sio_server.event
 async def disconnect(sid):
-    logger.info("in disconnect func")
+    logger.info("in disconnect function")
     user_id = next((key for key, value in active_connections.items() if value == sid), None)
     if user_id:
         active_connections.pop(user_id)

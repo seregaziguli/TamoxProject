@@ -5,46 +5,46 @@ import userDefaultPfp from "../../../assets/images/userDefaultPfp.png";
 import "./Chat.css";
 
 const Chat = () => {
-  console.log("here -1");
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [socket, setSocket] = useState(null);
-  const [userId, setUserId] = useState(null); 
-  console.log("here 0");
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        console.log("fetching list of users...");
         const response = await axios.get("http://localhost:8006/users/all");
-        console.log("here 1");
         setUsers(response.data);
+        console.log("users fetched successfully:", response.data);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.log("Failed to fetch users:", error);
       }
     };
 
     fetchUsers();
   }, []);
-  
+
   useEffect(() => {
     const fetchUserData = async () => {
       const accessToken = localStorage.getItem("access_token");
       if (!accessToken) {
-        console.error("Access token is missing");
+        console.log("access token is missing in local storage.");
         return;
       }
       try {
+        console.log("fetching current user data...");
         const response = await axios.get("http://localhost:8005/users/me", {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         });
-        console.log("Current user data:", response.data);
-        setUserId(response.data.id);  // Set the user ID
+        setUserId(response.data.id);
+        console.log("current user data fetched successfully:", response.data);
       } catch (error) {
-        console.error("Error fetching current user data:", error);
+        console.log("Failed to fetch current user data:", error);
       }
     };
 
@@ -53,42 +53,39 @@ const Chat = () => {
 
   useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
-    console.log("here 2");
     if (!accessToken) {
-      console.error("Access token is missing");
+      console.log("access token is missing in local storage.");
       return;
     }
-    console.log("here 3");
+
+    console.log("connecting to socket.io server");
     const socketInstance = io("http://localhost:8009", {
       path: "/sockets",
       extraHeaders: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    console.log("socket instance:", socketInstance);
 
-    console.log("here 4");
     socketInstance.on("connect", () => {
-      console.log("Connected to Socket.IO!");
+      console.log("successfully connected to socket.io server.");
     });
 
     socketInstance.on("receive_message", (message) => {
+      console.log("new message received:", message);
       setMessages((prevMessages) => [
         ...prevMessages,
         { from_user_id: message.from_user_id, content: message.content },
       ]);
-      console.log("here 9");
     });
-    console.log("here 5");
 
     socketInstance.on("disconnect", () => {
-      console.log("Socket.IO disconnected");
+      console.log("disconnected from socket.io server.");
     });
 
     setSocket(socketInstance);
 
     return () => {
-      console.log("here 6");
+      console.log("disconnecting from socket.io server...");
       if (socketInstance) {
         socketInstance.disconnect();
       }
@@ -96,28 +93,33 @@ const Chat = () => {
   }, []);
 
   const handleSendMessage = async () => {
-    console.log("here 7");
-    if (newMessage.trim() === "" || !selectedUser || !userId) return; 
+    if (newMessage.trim() === "" || !selectedUser || !userId) {
+      console.log(
+        "message sending failed: Missing data (message, selected user, or userId)."
+      );
+      return;
+    }
 
     const messageData = {
-      from_user_id: userId, 
+      from_user_id: userId,
       to_user_id: selectedUser.id,
       content: newMessage,
     };
 
-    console.log("Emitting send_message with data:", messageData);
-    console.log("socket:", socket);
+    console.log("socket:", socket)
+    console.log("sending message:", messageData);
 
-    socket.emit("send_message", messageData);
+    socket.emit("send_message", messageData, (response) => {
+      console.log("server response for send_message:", response);
+    });
 
-    console.log("emitted");
+    console.log("message has been sent")
 
     setMessages((prevMessages) => [
       ...prevMessages,
-      { from_user_id: userId, content: newMessage }, 
+      { from_user_id: userId, content: newMessage },
     ]);
     setNewMessage("");
-    console.log("here 8");
   };
 
   return (
