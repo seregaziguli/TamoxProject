@@ -1,0 +1,218 @@
+version: '3.8'
+
+services:
+  auth_service:
+      build: 
+        context: ./auth_service
+        dockerfile: Dockerfile
+      command: ["./scripts/start.sh"]
+      container_name: auth_service
+      ports:
+        - "8005:8000"
+      depends_on:
+        auth_db:
+          condition: service_healthy
+      environment:
+        POSTGRES_USER: "postgres"
+        POSTGRES_PASS: "34tgw3eg"
+        POSTGRES_DB: "auth_service_db"
+        POSTGRES_HOST: "auth_db"
+        POSTGRES_PORT: "5432"
+      networks:
+        - app_network
+
+  registration_service:
+    build:
+      context: ./registration_service
+      dockerfile: Dockerfile
+    command: ["./scripts/start.sh"]
+    container_name: registration_service
+    ports:
+      - "8006:8000"
+    depends_on:
+      registration_db:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASS: "34tgw3eg"
+      POSTGRES_DB: "registration_service_db"
+      POSTGRES_HOST: "registration_db"
+      POSTGRES_PORT: "5432"
+    networks:
+      - app_network
+
+  order_service:
+    build: 
+      context: ./order_service
+      dockerfile: Dockerfile
+    command: ["./scripts/start.sh"]
+    container_name: order_service
+    ports:
+      - "8007:8000"
+    depends_on:
+      order_db:
+        condition: service_healthy
+      auth_service:
+        condition: service_started
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASS: "34tgw3eg"
+      POSTGRES_DB: "order_service_db"
+      POSTGRES_HOST: "order_db"
+      POSTGRES_PORT: "5432"
+    networks:
+      - app_network
+
+  auth_db:
+    image: postgres:14
+    networks:
+      - app_network
+    ports:
+      - "5438:5432"
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASS: "34tgw3eg"
+      POSTGRES_DB: "auth_service_db"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "auth_service_db", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  registration_db:
+    image: postgres:14
+    networks:
+      - app_network
+    ports:
+      - "5437:5432"
+    volumes:
+      - registration_db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASS: "34tgw3eg"
+      POSTGRES_DB: "registration_service_db"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "registration_service_db", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  order_db:
+    image: postgres:14
+    networks:
+      - app_network
+    ports:
+      - "5439:5432"
+    volumes:
+      - order_db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASS: "34tgw3eg"
+      POSTGRES_DB: "order_service_db"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "order_service_db", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+  order_management_service:
+    build:
+      context: ./order_management_service
+      dockerfile: Dockerfile
+    container_name: order_management_service
+    depends_on:
+      - rabbitmq
+      - order_service
+    environment:
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_PORT: "5672"
+      ORDER_SERVICE_URL: "http://order_service:8002"
+    networks:
+      - app_network
+
+  notification_service:
+    build:
+      context: ./notification_service
+      dockerfile: Dockerfile
+    container_name: notification_service
+    ports:
+      - "8008:8000"
+    networks:
+      - app_network
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASS: "34tgw3eg"
+      POSTGRES_DB: "notification_service_db"
+      POSTGRES_HOST: "notification_db"
+      POSTGRES_PORT: "5432"
+    depends_on:
+      notification_db:
+        condition: service_healthy
+
+  notification_db:
+    image: postgres:14
+    networks:
+      - app_network
+    ports:
+      - "5440:5432"
+    volumes:
+      - notification_db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASS: "34tgw3eg"
+      POSTGRES_DB: "notification_service_db"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "notification_service_db", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: redis_app
+    command: --port 6379
+    expose:
+      - 6379
+    networks:
+      - app_network
+
+  taskiq:
+    build:
+      context: ./order_service
+      dockerfile: Dockerfile
+    container_name: taskiq_worker
+    environment:
+      - TASKIQ_BROKER=redis://redis_app:6379 
+    depends_on:
+      - redis
+    command: ["taskiq", "worker", "src.utils.background_tasks.tasks:broker"]
+    networks:
+      - app_network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest_pass"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  auth_db_data:
+  registration_db_data:
+  order_db_data:
+  rabbitmq_data:
+  notification_db_data:

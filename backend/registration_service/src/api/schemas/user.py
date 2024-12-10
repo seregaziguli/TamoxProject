@@ -1,0 +1,24 @@
+from datetime import datetime
+from pydantic import EmailStr
+from typing import Optional, Union
+from src.api.schemas.base import BaseResponse
+
+class UserResponseDTO(BaseResponse):
+    id: int
+    email: str
+    name: str
+    phone_number: str
+    created_at: Optional[str]
+
+    class Config:
+        orm_mode = True
+    
+class RegisterUserRequestDTO(BaseResponse):
+    name: str
+    email: EmailStr
+    password: str
+    phone_number: str
+    
+class VerifyUserRequestDTO(BaseResponse):
+    token: str
+    email: str

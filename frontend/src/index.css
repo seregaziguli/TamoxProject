@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-inner-spin-button,
+input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.exit-window {
+  position: fixed;
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%); 
+  height: 100%; 
+  width: 100%; 
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;    
+  z-index: 100;
+}
+
+.toggle-button-display {
+  display: none;
+}
+
+.input-form-1 {
+  border: 1px solid #ababab;
+  border-radius: 6px;
+  display: block;
+  font-size: 0.875rem; /* text-sm */
+  letter-spacing: 0.05em; /* tracking-wider */
+  font-weight: 400; /* font-normal */
+  outline: none; /* outline-none */
+}
+
+.submit-button-black {
+  border-radius: 6px;
+  background-color: #353535;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button-black:hover {
+  background-color: #1d1d1d;
+}
+
+.submit-button-black:active {
+  position: relative;
+  top: 1.5px;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 0fr);
+  column-gap: 3rem;
+  row-gap: 2rem;
+  justify-items: center;
+}
+
