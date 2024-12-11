@@ -2,7 +2,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.repositories.order_repository import OrderRepository
 from src.services.order_service import OrderService
-from src.db.session import get_async_session
+from src.api.deps.session import get_async_session
 from src.utils.user import verify_user
 from src.services.s3_service import S3Client
 from src.core.conifg import settings
