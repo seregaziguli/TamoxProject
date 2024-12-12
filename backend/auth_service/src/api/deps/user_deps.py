@@ -20,11 +20,10 @@ async def get_user_repository(session: AsyncSession = Depends(get_async_session)
     return UserRepository(session)
 
 async def get_token_service(
-    session: AsyncSession = Depends(get_async_session),
     token_repo: TokenRepository = Depends(get_token_repository),
     user_repo: UserRepository = Depends(get_user_repository)
 ) -> TokenService:
-    return TokenService(session, token_repo, user_repo)
+    return TokenService(token_repo, user_repo)
 
 async def get_auth_service(
     session: AsyncSession = Depends(get_async_session),

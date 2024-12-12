@@ -1,10 +1,6 @@
 from fastapi import APIRouter, status, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.schemas.user import RegisterUserRequestDTO, UserResponseDTO
 from src.services.user_service import UserService
-from src.repositories.user_repository import UserRepository
-from src.api.deps.auth_service_deps import get_auth_service_client
-from src.api.deps.session import get_async_session
 from src.api.deps.registration_deps import get_user_service
 from typing import List
 

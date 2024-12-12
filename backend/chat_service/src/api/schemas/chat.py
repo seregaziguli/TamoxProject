@@ -5,7 +5,7 @@ class MessageCreate(BaseResponse):
     to_user_id: int
     content: str
 
-class MessageResponse(BaseResponse):
+class MessageResponseDTO(BaseResponse):
     id: int
     from_user_id: int
     to_user_id: int

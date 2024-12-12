@@ -1,10 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-
+from fastapi import HTTPException
 from src.models.user import User, UserToken
 from src.core.security import hash_password, verify_password, generate_token, get_token_payload, str_encode, str_decode
 from src.repositories.user_repository import UserRepository
@@ -16,11 +13,9 @@ from src.utils.logger import logger
 class TokenService:
     def __init__(
             self,
-            session: AsyncSession,
             token_repo: TokenRepository,
             user_repo: UserRepository,
             ):
-        self.session = session
         self.token_repo = token_repo
         self.user_repo = user_repo
     
