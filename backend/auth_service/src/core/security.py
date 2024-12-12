@@ -1,13 +1,9 @@
 from src.utils.logger import logger
-from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 from passlib.context import CryptContext
 import base64
-from sqlalchemy.orm import joinedload
 from datetime import datetime, timedelta
-from src.core.config import settings
-from src.models.user import UserToken
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from src.models.user import User
@@ -16,7 +12,6 @@ from sqlalchemy import select
 SPECIAL_CHARACTERS = ['@', '#', '$', '%', '=', ':', '?', '.', '/', '|', '~', '>']
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login") # The endpoint where the user can get a token
-app_settings = settings()
 
 def hash_password(password):
     return pwd_context.hash(password)
