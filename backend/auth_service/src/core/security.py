@@ -41,10 +41,8 @@ def is_password_strong_enough(password: str) -> bool:
 def str_encode(string: str) -> str:
     return base64.b85encode(string.encode('ascii')).decode('ascii')
 
-
 def str_decode(string: str) -> str:
     return base64.b85decode(string.encode('ascii')).decode('ascii')
-
 
 def get_token_payload(token: str, secret: str, algo: str):
     try:
@@ -54,12 +52,10 @@ def get_token_payload(token: str, secret: str, algo: str):
         payload = None
     return payload
 
-
 def generate_token(payload: dict, secret: str, algo: str, expiry: timedelta):
     expire = datetime.utcnow() + expiry
     payload.update({"exp": expire})
     return jwt.encode(payload, secret, algorithm=algo)
-
 
 async def load_user(email: str, session: AsyncSession) -> User | None:
     try:

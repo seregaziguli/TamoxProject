@@ -11,7 +11,6 @@ class TokenRepository:
         self.session = session
 
     async def get_token_user_by_access(self, user_token_id: int, user_id: int, access_token: str) -> Optional[UserToken]:
-        logger.info(f"In get_token_user_by_access function")
         stmt = (
             select(UserToken)
             .options(joinedload(UserToken.user))
@@ -22,9 +21,7 @@ class TokenRepository:
                 UserToken.expires_at > datetime.utcnow()
             )
         )
-        logger.info(f"After stmt")
         result = await self.session.execute(stmt)
-        logger.info(f"After result: {result}")
         return result.scalars().first()
 
     async def add_token(self, user_token: UserToken) -> None:
@@ -37,13 +34,11 @@ class TokenRepository:
             UserToken.access_token == str(access_token),
             UserToken.user_id == int(user_id)
         )
-        logger.info("Executing statement in get_user_token")
         try:
             result = await self.session.execute(stmt)
         except Exception as e:
             logger.error(f"Error executing statement: {e}", exc_info=True)
             return None
-        logger.info("Statement executed successfully")
         return result.scalars().first()
 
     async def update_token(self, user_token: UserToken) -> None:
@@ -59,10 +54,7 @@ class TokenRepository:
         stmt = select(UserToken).where(UserToken.user_id == user_id)
         result = await self.session.execute(stmt)
         tokens = result.scalars().all()
-        logger.info(f"Deleting tokens: {tokens}")
         for token in tokens:
             await self.session.delete(token)
         await self.session.commit()
-        logger.info("Tokens deleted successfully.")
-
     
