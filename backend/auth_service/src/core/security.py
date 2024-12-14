@@ -57,14 +57,5 @@ def generate_token(payload: dict, secret: str, algo: str, expiry: timedelta):
     payload.update({"exp": expire})
     return jwt.encode(payload, secret, algorithm=algo)
 
-async def load_user(email: str, session: AsyncSession) -> User | None:
-    try:
-        result = await session.execute(select(User).where(User.email == email))
-        user = result.scalar_one_or_none()
-    except Exception as user_exec:
-        logger.info(f"Error loading user: {user_exec}; Email: {email}")
-        user = None
-    return user
-
         
 
