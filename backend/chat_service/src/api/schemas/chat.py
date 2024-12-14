@@ -1,4 +1,4 @@
-from src.api.schemas.base import BaseResponse
+from .base import BaseResponse
 from datetime import datetime
 
 class MessageCreate(BaseResponse):

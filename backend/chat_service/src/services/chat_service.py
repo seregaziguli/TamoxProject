@@ -1,4 +1,4 @@
-from src.repositories.chat_repository import ChatRepository
+from ...src.repositories.chat_repository import ChatRepository
 
 class ChatService:
     def __init__(

@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.socket_manager import create_socket_manager_app
 import socketio
-from src.utils.logger import logger
 
 app = FastAPI()
 

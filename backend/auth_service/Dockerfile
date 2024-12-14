@@ -13,4 +13,6 @@ COPY .env /app/.env
 
 RUN chmod +x /app/scripts/start.sh
 
+ENV PYTHONPATH=/app
+
 CMD ["/app/scripts/start.sh"]

@@ -1,14 +1,11 @@
-from fastapi import APIRouter, Depends
-from src.utils.logger import logger
-from src.api.deps.chat_deps import get_current_user
-from src.services.chat_service import ChatService
-from src.api.schemas.chat import MessageCreate
-from src.main import sio_server
-from src.api.deps.chat_deps import get_chat_service
-from src.utils.user import verify_user
+from ...utils.logger import logger
+from ...services.chat_service import ChatService
+from ...api.schemas.chat import MessageCreate
+from ...main import sio_server
+from ...utils.user import verify_user
 from fastapi import HTTPException
-from src.repositories.chat_repository import ChatRepository
-from src.api.deps.session import get_async_session
+from ...repositories.chat_repository import ChatRepository
+from ...api.deps.session import get_async_session
 
 active_connections = {}
 

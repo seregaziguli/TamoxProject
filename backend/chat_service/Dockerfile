@@ -13,6 +13,8 @@ COPY .env /app/.env
 
 RUN chmod +x /app/scripts/start.sh
 
+ENV PYTHONPATH=/app
+
 EXPOSE 8000
 
 CMD ["/app/scripts/start.sh"]

@@ -1,7 +1,7 @@
 from sqlalchemy.future import select
-from src.models.message import Message
+from ..models.message import Message
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.utils.logger import logger
+from ..utils.logger import logger
 
 class ChatRepository:
     def __init__(self, db: AsyncSession):
