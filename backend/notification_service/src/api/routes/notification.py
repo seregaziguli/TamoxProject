@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 from fastapi import Depends, HTTPException
-from src.api.deps.notification_deps import get_notification_service
-from src.api.schemas.notification import NotificationResponseDTO
-from src.services.notification_service import NotificationService
+from ...api.deps.notification_deps import get_notification_service
+from ...api.schemas.notification import NotificationResponseDTO
+from ...services.notification_service import NotificationService
 from typing import List
-from src.utils.logger import logger
+from ...utils.logger import logger
 
 notification_router = APIRouter(
     prefix="/notifications",

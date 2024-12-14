@@ -1,9 +1,9 @@
-from src.utils.messaging import get_rabbitmq_connection
-from src.repositories.notification_repository import NotificationRepository
-from src.models.notification import Notification
+from ..utils.messaging import get_rabbitmq_connection
+from ..repositories.notification_repository import NotificationRepository
+from ..models.notification import Notification
 from typing import List
-from src.api.schemas.notification import NotificationResponseDTO
-from src.utils.logger import logger
+from ..api.schemas.notification import NotificationResponseDTO
+from ..utils.logger import logger
 import json
 
 class NotificationService:

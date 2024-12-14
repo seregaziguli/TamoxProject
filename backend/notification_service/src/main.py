@@ -3,11 +3,11 @@ from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 import asyncio
 from fastapi import FastAPI
-from src.services.notification_service import NotificationService
-from src.repositories.notification_repository import NotificationRepository
-from src.db.session import async_session_maker
-from src.core.config import settings
-from src.api.routes import notification, healthcheck
+from .services.notification_service import NotificationService
+from .repositories.notification_repository import NotificationRepository
+from .db.session import async_session_maker
+from .core.config import settings
+from .api.routes import notification, healthcheck
 
 
 @asynccontextmanager

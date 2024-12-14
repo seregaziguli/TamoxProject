@@ -1,4 +1,4 @@
-from src.db.session import Base
+from ..db.session import Base
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, func
 
 class Notification(Base):

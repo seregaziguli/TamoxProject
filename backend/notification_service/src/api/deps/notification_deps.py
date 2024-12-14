@@ -2,9 +2,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.db.session import async_session_maker
 from typing import AsyncGenerator
 from fastapi import Depends
-from src.services.notification_service import NotificationService
-from src.utils.user import verify_user
-from src.repositories.notification_repository import NotificationRepository
+from ...services.notification_service import NotificationService
+from ...utils.user import verify_user
+from ...repositories.notification_repository import NotificationRepository
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:

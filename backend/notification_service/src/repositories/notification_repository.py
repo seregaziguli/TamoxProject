@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.models.notification import Notification
+from ..models.notification import Notification
 from sqlalchemy.future import select
 from sqlalchemy import or_
 from typing import List
