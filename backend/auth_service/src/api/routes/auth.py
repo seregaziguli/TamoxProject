@@ -4,7 +4,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.schemas.user import LoginResponseDTO, RegisterUserRequestDTO, RegisterUserResponseDTO, User as UserPydantic
-from src.api.deps.user_deps import get_current_user, get_async_session, get_auth_service
+from src.api.deps.user_deps import get_current_user, get_async_session, get_auth_service, get_registration_service
+from src.services.registration_service import RegistrationService
 from src.models.user import User as UserSQLAlchemy 
 from fastapi.exceptions import HTTPException
 from src.core.security import hash_password
@@ -59,23 +60,15 @@ async def verify_token(
 @auth_router.post("", status_code=status.HTTP_201_CREATED, response_model=RegisterUserResponseDTO) # this router accepts a post request from the registration service
 async def register_user(
     data: RegisterUserRequestDTO, 
-    session: AsyncSession = Depends(get_async_session),
-    auth_service: AuthService = Depends(get_auth_service)
+    registration_service: RegistrationService = Depends(get_registration_service)
 ):
-    existing_user = await session.execute(select(UserSQLAlchemy).where(UserSQLAlchemy.email == data.email))
-    if existing_user.scalars().first():
-        raise HTTPException(status_code=400, detail="User with this email already exists.")
-    
-    hashed_password = hash_password(data.password)
-    new_user = UserSQLAlchemy(email=data.email, password=hashed_password, is_active=True)
-    
-    session.add(new_user)
-    await session.commit()
-
-    return {
-        "id": new_user.id,
-        "name": data.name,
-        "email": new_user.email,
-        "phone_number": data.phone_number,
-        "message": "User registered successfully. No tokens generated."
-    }
+    try:
+        new_user = await registration_service.register_user(data)
+        return RegisterUserResponseDTO(
+            id=new_user.id,
+            name=data.name,
+            email=new_user.email,
+            phone_number=data.phone_number
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

@@ -1,3 +1,4 @@
+from src.services.registration_service import RegistrationService
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.security import oauth2_scheme
@@ -38,6 +39,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme), auth_service: Au
         raise HTTPException(status_code=401, detail="Invalid or expired token.")
     return user
 
+async def get_registration_service(user_repo: UserRepository = Depends(get_user_repository)) -> RegistrationService:
+    return RegistrationService(user_repo=user_repo)
 
 
 
