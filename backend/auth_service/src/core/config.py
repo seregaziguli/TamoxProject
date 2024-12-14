@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str
     POSTGRES_PORT: int
     POSTGRES_DB: str
+
+    REGISTRATION_SERVICE_URL: str
     
     # JWT Secret Key
     JWT_SECRET: str

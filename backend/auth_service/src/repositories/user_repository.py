@@ -18,3 +18,7 @@ class UserRepository:
         stmt = select(User).options(selectinload(User.tokens)).where(User.id == int(user_id))
         result = await self.session.execute(stmt)
         return result.scalars().first()
+
+    async def add_user(self, user: User):
+        self.session.add(user)
+        await self.session.commit()
