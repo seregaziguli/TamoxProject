@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.api.routes import auth
-from src.utils.logger import logger
+from .api.routes import auth
+from .utils.logger import logger
 
 app = FastAPI()
 

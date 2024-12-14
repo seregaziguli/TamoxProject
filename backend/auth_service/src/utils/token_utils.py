@@ -1,5 +1,5 @@
 import jwt
-from src.utils.logger import logger
+from ..utils.logger import logger
 
 async def get_token_payload(token: str, secret: str, algo: str):
     try:

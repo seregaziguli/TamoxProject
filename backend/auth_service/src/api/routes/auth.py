@@ -1,16 +1,14 @@
 from fastapi import APIRouter, Depends, Header, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.schemas.user import LoginResponseDTO, RegisterUserRequestDTO, RegisterUserResponseDTO, User as UserPydantic
-from src.api.deps.user_deps import get_current_user, get_async_session, get_auth_service, get_registration_service
-from src.services.registration_service import RegistrationService
-from src.models.user import User as UserSQLAlchemy 
+from ...api.schemas.user import LoginResponseDTO, RegisterUserRequestDTO, RegisterUserResponseDTO, User as UserPydantic
+from ...api.deps.user_deps import get_current_user, get_async_session, get_auth_service, get_registration_service
+from ...services.registration_service import RegistrationService
+from ...models.user import User as UserSQLAlchemy 
 from fastapi.exceptions import HTTPException
-from src.core.security import hash_password
-from src.utils.logger import logger
-from src.services.auth_service import AuthService
+from ...utils.logger import logger
+from ...services.auth_service import AuthService
 
 auth_router = APIRouter(
     prefix="/users",
@@ -54,8 +52,6 @@ async def verify_token(
     except Exception as e:
         logger.error(f"Error verifying token: {str(e)}", exc_info=True)
         raise HTTPException(status_code=401, detail="Error verifying token")
-
-# -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 @auth_router.post("", status_code=status.HTTP_201_CREATED, response_model=RegisterUserResponseDTO) # this router accepts a post request from the registration service
 async def register_user(

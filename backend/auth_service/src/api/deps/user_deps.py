@@ -1,14 +1,13 @@
-from src.services.registration_service import RegistrationService
+from ...services.registration_service import RegistrationService
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.core.security import oauth2_scheme
-from src.models.user import User
-from src.db.session import async_session_maker
+from ...core.security import oauth2_scheme
+from ...db.session import async_session_maker
 from typing import AsyncGenerator
-from src.services.auth_service import AuthService
-from src.repositories.user_repository import UserRepository
-from src.services.token_service import TokenService
-from src.repositories.token_repository import TokenRepository
+from ...services.auth_service import AuthService
+from ...repositories.user_repository import UserRepository
+from ...services.token_service import TokenService
+from ...repositories.token_repository import TokenRepository
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:

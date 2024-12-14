@@ -1,10 +1,10 @@
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from src.models.user import UserToken
+from ..models.user import UserToken
 from typing import Optional
 from sqlalchemy.orm import joinedload
-from src.utils.logger import logger
+from ..utils.logger import logger
 
 class TokenRepository:
     def __init__(self, session: AsyncSession):

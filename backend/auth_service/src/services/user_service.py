@@ -1,6 +1,6 @@
 import httpx
 from fastapi.exceptions import HTTPException
-from src.core.config import settings
+from ..core.config import settings
 
 class ExternalUserService:
     async def get_user_from_registration_service(self, email: str) -> dict:

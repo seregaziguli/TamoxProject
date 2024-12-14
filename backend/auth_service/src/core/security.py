@@ -1,13 +1,9 @@
-from src.utils.logger import logger
+from ..utils.logger import logger
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 from passlib.context import CryptContext
 import base64
 from datetime import datetime, timedelta
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from src.models.user import User
-from sqlalchemy import select
 
 SPECIAL_CHARACTERS = ['@', '#', '$', '%', '=', ':', '?', '.', '/', '|', '~', '>']
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

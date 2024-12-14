@@ -1,8 +1,8 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
 from typing import Optional, Union, Dict, Any, List
-from src.api.schemas.base import BaseResponse
-from src.api.schemas.token import UserTokenDTO
+from ...api.schemas.base import BaseResponse
+from ...api.schemas.token import UserTokenDTO
 
 class LoginResponseDTO(BaseResponse):
     access_token: str

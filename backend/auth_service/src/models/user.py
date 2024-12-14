@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from src.db.session import Base
+from ..db.session import Base
 
 class User(Base):
     __tablename__ = "users_auth"

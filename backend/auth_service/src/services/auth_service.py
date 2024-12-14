@@ -1,13 +1,11 @@
 from typing import Optional
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.models.user import User
-from src.api.schemas.token import UserTokenDTO
-from src.core.security import verify_password
-from src.repositories.user_repository import UserRepository
-from src.core.config import settings
-from src.utils.logger import logger
-from src.services.token_service import TokenService
+from ..models.user import User
+from ..api.schemas.token import UserTokenDTO
+from ..core.security import verify_password
+from ..repositories.user_repository import UserRepository
+from ..services.token_service import TokenService
 
 class AuthService:
     def __init__(

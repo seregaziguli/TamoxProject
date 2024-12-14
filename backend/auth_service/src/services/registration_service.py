@@ -1,7 +1,7 @@
-from src.models.user import User
-from src.repositories.user_repository import UserRepository
-from src.api.schemas.user import RegisterUserRequestDTO
-from src.core.security import hash_password
+from ..models.user import User
+from ..repositories.user_repository import UserRepository
+from ..api.schemas.user import RegisterUserRequestDTO
+from ..core.security import hash_password
 from sqlalchemy.exc import IntegrityError
 
 class RegistrationService:
