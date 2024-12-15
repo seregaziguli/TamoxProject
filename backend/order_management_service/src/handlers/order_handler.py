@@ -1,6 +1,6 @@
 import json
 from ..core.messaging import get_rabbitmq_connection
-from ..utils.logger import logger
+from fastapi import HTTPException
 from ..services.order_management_service import OrderManagementService
 
 class RabbitMQConsumer:
@@ -10,14 +10,17 @@ class RabbitMQConsumer:
         self.order_management_service = order_management_service
 
     async def start(self):
-        connection = await get_rabbitmq_connection(self.rabbitmq_url)
-        async with connection:
-            channel = await connection.channel()
-            queue = await channel.declare_queue(self.queue_name, durable=True)
+        try:
+            connection = await get_rabbitmq_connection(self.rabbitmq_url)
+            async with connection:
+                channel = await connection.channel()
+                queue = await channel.declare_queue(self.queue_name, durable=True)
 
-            async for message in queue:
-                async with message.process():
-                    await self.handle_message(message.body.decode())
+                async for message in queue:
+                    async with message.process():
+                        await self.handle_message(message.body.decode())
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error starting RabbitMQ consumer: {str(e)}")
 
     async def handle_message(self, order_info: str) -> None:
         try:
@@ -25,11 +28,12 @@ class RabbitMQConsumer:
             order_id = order_data.get("order_id")
             
             if not order_id:
-                logger.error("Order id not found in message. Message: %s", order_data)
-                return
-            
+                raise HTTPException(status_code=400, detail="Order id not found in message")
+
             await self.order_management_service.process_order_update(order_id, order_data)
         except json.JSONDecodeError as e:
-            logger.error("Incorrect format JSON in message. Error: %s. Message: %s", e, order_info)
+            raise HTTPException(status_code=400, detail=f"Incorrect format JSON in message: {str(e)}")
+        except HTTPException as e:
+            raise e  
         except Exception as e:
-            logger.error(f"Error while processing order: {str(e)}, {order_info}")
+            raise HTTPException(status_code=500, detail=f"Error while processing order: {str(e)}")
