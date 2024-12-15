@@ -1,7 +1,6 @@
-from src.db.session import Base
-from sqlalchemy.orm import mapped_column, relationship, joinedload
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, func, select
-from datetime import datetime
+from ..db.session import Base
+from sqlalchemy.orm import joinedload
+from sqlalchemy import Column, Integer, String, DateTime, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 class User(Base):

@@ -1,10 +1,9 @@
 from fastapi import HTTPException
-from src.repositories.user_repository import UserRepository
-from src.api.schemas.user import RegisterUserRequestDTO
-from src.core.security import hash_password
-import httpx
-from src.utils.logger import logger
-from src.services.auth_service_client import AuthServiceClient
+from ..repositories.user_repository import UserRepository
+from ..api.schemas.user import RegisterUserRequestDTO
+from ..core.security import hash_password
+from ..utils.logger import logger
+from ..services.auth_service_client import AuthServiceClient
 
 class UserService:
     def __init__(self, user_repository: UserRepository, auth_service_client: AuthServiceClient):

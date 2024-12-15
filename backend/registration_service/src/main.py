@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src.api.routes import user
+from .api.routes import user
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()

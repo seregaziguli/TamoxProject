@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, Depends, HTTPException
-from src.api.schemas.user import RegisterUserRequestDTO, UserResponseDTO
-from src.services.user_service import UserService
-from src.api.deps.registration_deps import get_user_service
+from ...api.schemas.user import RegisterUserRequestDTO, UserResponseDTO
+from ...services.user_service import UserService
+from ...api.deps.registration_deps import get_user_service
 from typing import List
 
 user_router = APIRouter(

@@ -1,7 +1,6 @@
-from datetime import datetime
 from pydantic import EmailStr
-from typing import Optional, Union
-from src.api.schemas.base import BaseResponse
+from typing import Optional
+from .base import BaseResponse
 
 class UserResponseDTO(BaseResponse):
     id: int
