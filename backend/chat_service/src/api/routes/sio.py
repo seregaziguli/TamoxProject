@@ -10,10 +10,13 @@ from ...api.deps.session import get_async_session
 active_connections = {}
 
 def log_active_connections():
-    logger.info("active connections: {}".format(active_connections))
-    for user_id, sid in active_connections.items():
-        rooms = sio_server.rooms(sid)
-        logger.info(f"User {user_id} with SID {sid} is in rooms: {rooms}")
+    try:
+        logger.info("active connections: {}".format(active_connections))
+        for user_id, sid in active_connections.items():
+            rooms = sio_server.rooms(sid)
+            logger.info(f"User {user_id} with SID {sid} is in rooms: {rooms}")
+    except Exception as e:
+        logger.error(f"Error logging active connections: {str(e)}")
 
 @sio_server.event
 async def connect(sid, environ):
@@ -32,7 +35,9 @@ async def connect(sid, environ):
     except HTTPException as e:
         logger.error(f"Failed to verify user for SID {sid}: {str(e)}")
         await sio_server.disconnect(sid)
-
+    except Exception as e:
+        logger.error(f"Unexpected error in connect function for SID {sid}: {str(e)}")
+        await sio_server.disconnect(sid)
 
 @sio_server.event
 async def send_message(sid, data):
@@ -58,30 +63,35 @@ async def send_message(sid, data):
             logger.error(f"Invalid message data: {str(e)}")
             return
 
-        async with get_async_session() as session:
-            chat_repository = ChatRepository(session)
-            chat_service = ChatService(chat_repository=chat_repository)
+        try:
+            async with get_async_session() as session:
+                chat_repository = ChatRepository(session)
+                chat_service = ChatService(chat_repository=chat_repository)
 
-            message = await chat_service.send_message(
-                from_user_id=user_id,
-                to_user_id=message_data.to_user_id,
-                content=message_data.content
-            )
-
-            logger.info(f"Message saved: {message}")
-
-            to_user_sid = active_connections.get(message_data.to_user_id)
-            if to_user_sid:
-                await sio_server.emit(
-                    "receive_message",
-                    {"from_user_id": user_id, "content": message_data.content},
-                    room=to_user_sid
+                message = await chat_service.send_message(
+                    from_user_id=user_id,
+                    to_user_id=message_data.to_user_id,
+                    content=message_data.content
                 )
-                logger.info(f"Message delivered to user {message_data.to_user_id} with SID {to_user_sid}.")
-            else:
-                logger.info(f"User {message_data.to_user_id} is not connected.")
+
+                logger.info(f"Message saved: {message}")
+
+                to_user_sid = active_connections.get(message_data.to_user_id)
+                if to_user_sid:
+                    await sio_server.emit(
+                        "receive_message",
+                        {"from_user_id": user_id, "content": message_data.content},
+                        room=to_user_sid
+                    )
+                    logger.info(f"Message delivered to user {message_data.to_user_id} with SID {to_user_sid}.")
+                else:
+                    logger.info(f"User {message_data.to_user_id} is not connected.")
+        except Exception as e:
+            logger.error(f"Error handling message sending: {str(e)}")
+
     except Exception as e:
         logger.error(f"Error in send_message: {str(e)}")
+        await sio_server.disconnect(sid)
 
 @sio_server.event
 async def disconnect(sid):
@@ -92,8 +102,4 @@ async def disconnect(sid):
             active_connections.pop(user_id)
         logger.info(f"User {user_id} disconnected")
     except Exception as e:
-        logger.error(f"Error in disconnect function: {e}")
-
-
-
-
+        logger.error(f"Error in disconnect function: {str(e)}")
