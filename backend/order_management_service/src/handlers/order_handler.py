@@ -1,7 +1,7 @@
 import json
-from src.core.messaging import get_rabbitmq_connection
-from src.utils.logger import logger
-from src.services.order_management_service import OrderManagementService
+from ..core.messaging import get_rabbitmq_connection
+from ..utils.logger import logger
+from ..services.order_management_service import OrderManagementService
 
 class RabbitMQConsumer:
     def __init__(self, rabbitmq_url: str, queue_name: str, order_management_service: OrderManagementService):

@@ -1,5 +1,5 @@
-from src.repositories.order_management_repository import OrderManagementRepository
-from src.utils.logger import logger
+from ..repositories.order_management_repository import OrderManagementRepository
+from ..utils.logger import logger
 
 class OrderManagementService:
     def __init__(self, order_management_repository: OrderManagementRepository):

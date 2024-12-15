@@ -1,5 +1,5 @@
 import httpx
-from src.utils.logger import logger
+from ..utils.logger import logger
 
 class OrderManagementRepository:
     def __init__(self, base_url: str):
