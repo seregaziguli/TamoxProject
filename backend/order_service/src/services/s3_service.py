@@ -1,13 +1,12 @@
-import asyncio
 from contextlib import asynccontextmanager
-from src.utils.logger import logger
+from ..utils.logger import logger
 import os
 from aiobotocore.session import get_session
 from botocore.exceptions import ClientError
 import uuid
-from src.core.conifg import settings
+from ..core.conifg import settings
 from typing import Union
-from src.utils.logger import logger
+from ..utils.logger import logger
 
 class S3Client:
     def __init__(

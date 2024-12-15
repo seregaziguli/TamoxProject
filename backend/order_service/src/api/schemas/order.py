@@ -1,9 +1,7 @@
-from sqlalchemy import DateTime
-from src.api.schemas.base import BaseResponse
+from .base import BaseResponse
 from typing import Optional
 from datetime import datetime
-from enum import Enum
-from src.models.order import OrderAssignmentPolicy
+from ...models.order import OrderAssignmentPolicy
 
 class OrderResponseDTO(BaseResponse):
     id: int

@@ -1,16 +1,14 @@
-from src.services.order_service import OrderService
-from src.api.deps.order_deps import get_current_user, get_order_service, get_s3_client
-from src.api.schemas.order import OrderRequestDTO, OrderResponseDTO
-from src.utils.logger import logger
+from ...services.order_service import OrderService
+from ...api.deps.order_deps import get_current_user, get_order_service, get_s3_client
+from ...api.schemas.order import OrderRequestDTO, OrderResponseDTO
+from ...utils.logger import logger
 from typing import List, Union
-from src.utils.logger import logger
+from ...utils.logger import logger
 from fastapi.exceptions import HTTPException
-from fastapi import status, APIRouter, Depends, UploadFile, File, Body
-from pydantic import Json
-import json
+from fastapi import status, APIRouter, Depends, UploadFile, File
 from fastapi.responses import StreamingResponse
 import io
-from src.services.s3_service import S3Client
+from ...services.s3_service import S3Client
 from fastapi_cache.decorator import cache
 
 order_router = APIRouter(

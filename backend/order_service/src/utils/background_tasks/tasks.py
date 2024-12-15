@@ -1,8 +1,5 @@
-import asyncio
 from taskiq_redis import ListQueueBroker, RedisAsyncResultBackend
-import os
-from src.services.s3_service import s3_client
-from src.utils.logger import logger
+from ...services.s3_service import s3_client
 import base64
 
 redis_async_result = RedisAsyncResultBackend(

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, func, ForeignKey, Enum, Text, Boolean
 from sqlalchemy.orm import relationship
-from src.db.session import Base
+from ..db.session import Base
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select

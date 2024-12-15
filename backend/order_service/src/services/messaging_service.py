@@ -1,4 +1,4 @@
-from src.utils.messaging import get_rabbitmq_connection
+from ..utils.messaging import get_rabbitmq_connection
 from aio_pika import Message
 
 class MessagingService:

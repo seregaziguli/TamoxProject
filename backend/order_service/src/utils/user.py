@@ -1,7 +1,7 @@
 from fastapi import Header, HTTPException, Depends
 import httpx
-from src.utils.logger import logger
-from src.core.conifg import settings
+from ..utils.logger import logger
+from ..core.conifg import settings
 
 async def verify_user(access_token: str = Header(...)):
     async with httpx.AsyncClient() as client:

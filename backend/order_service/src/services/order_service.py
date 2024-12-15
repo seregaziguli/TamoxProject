@@ -1,17 +1,17 @@
 from datetime import datetime
-from src.utils.background_tasks.tasks import upload_image_task
-from src.repositories.order_repository import OrderRepository
-from src.api.schemas.order import OrderRequestDTO, OrderResponseDTO
+from ..utils.background_tasks.tasks import upload_image_task
+from ..repositories.order_repository import OrderRepository
+from ..api.schemas.order import OrderRequestDTO, OrderResponseDTO
 from typing import List, Optional
 from fastapi.exceptions import HTTPException
-from src.utils.logger import logger
-from src.models.order import OrderAssignment, OrderAssignmentStatus, OrderStatus
-from src.models.order import OrderAssignmentPolicy
+from ..utils.logger import logger
+from ..models.order import OrderAssignment, OrderAssignmentStatus, OrderStatus
+from ..models.order import OrderAssignmentPolicy
 from fastapi import UploadFile
 import json, httpx
-from src.core.conifg import settings
-from src.services.image_service import ImageService
-from src.services.messaging_service import MessagingService
+from ..core.conifg import settings
+from ..services.image_service import ImageService
+from ..services.messaging_service import MessagingService
 
 class OrderService:
     def __init__(

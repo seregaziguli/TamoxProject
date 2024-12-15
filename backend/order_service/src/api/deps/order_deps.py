@@ -1,13 +1,13 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.repositories.order_repository import OrderRepository
-from src.services.order_service import OrderService
-from src.api.deps.session import get_async_session
-from src.utils.user import verify_user
-from src.services.s3_service import S3Client
-from src.core.conifg import settings
-from src.services.messaging_service import MessagingService
-from src.services.image_service import ImageService
+from ...repositories.order_repository import OrderRepository
+from ...services.order_service import OrderService
+from ...api.deps.session import get_async_session
+from ...utils.user import verify_user
+from ...services.s3_service import S3Client
+from ...core.conifg import settings
+from ...services.messaging_service import MessagingService
+from ...services.image_service import ImageService
 
 async def get_order_repository(session: AsyncSession = Depends(get_async_session)) -> OrderRepository:
     return OrderRepository(session)

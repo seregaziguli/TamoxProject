@@ -1,7 +1,7 @@
 import base64
 from fastapi import UploadFile
-from src.services.s3_service import S3Client
-from src.utils.background_tasks.tasks import upload_image_task
+from ..services.s3_service import S3Client
+from ..utils.background_tasks.tasks import upload_image_task
 
 class ImageService:
     def __init__(self, s3_client: S3Client):

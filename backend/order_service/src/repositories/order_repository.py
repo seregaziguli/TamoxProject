@@ -1,11 +1,11 @@
 from sqlalchemy import update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from src.models.order import Order
+from ..models.order import Order
 from typing import List
-from src.models.order import OrderAssignment
-from src.utils.logger import logger
-from src.models.order import OrderAssignmentStatus
+from ..models.order import OrderAssignment
+from ..utils.logger import logger
+from ..models.order import OrderAssignmentStatus
 
 class OrderRepository:
     def __init__(self, db: AsyncSession):

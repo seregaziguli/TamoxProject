@@ -1,9 +1,8 @@
 from fastapi import FastAPI
-from src.api.routes import order
+from .api.routes import order
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-from fastapi_cache.decorator import cache
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from redis import asyncio as aioredis

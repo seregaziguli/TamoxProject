@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
-
-from src.core.conifg import settings
+from ..core.conifg import settings
 from pythonjsonlogger import jsonlogger
 
 logger = logging.getLogger()
