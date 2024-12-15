@@ -19,14 +19,16 @@ async def register_user(
         new_user = await user_service.register_user(data)
         return UserResponseDTO(**new_user.to_dict())
     except HTTPException as http_exc:
-        raise http_exc
+        raise http_exc 
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
-    
+        raise HTTPException(status_code=500, detail=f"Error registering user: {str(exc)}")
+
 @user_router.get("/all", response_model=List[UserResponseDTO]) 
 async def get_users(user_service: UserService = Depends(get_user_service)):
-    users = await user_service.get_all_users()
-    if not users:
-        raise HTTPException(status_code=404, detail="No users found.")
-    return [UserResponseDTO(**user.to_dict()) for user in users]  
-
+    try:
+        users = await user_service.get_all_users()
+        if not users:
+            raise HTTPException(status_code=404, detail="No users found.")
+        return [UserResponseDTO(**user.to_dict()) for user in users]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Error fetching users: {str(exc)}")
