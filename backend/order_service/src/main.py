@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from .api.routes import order
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
@@ -9,9 +9,14 @@ from redis import asyncio as aioredis
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    redis = aioredis.from_url("redis://redis_app:6379/0")
-    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
-    yield
+    try:
+        redis = aioredis.from_url("redis://redis_app:6379/0")
+        FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+        yield
+    except aioredis.RedisError as e:
+        raise HTTPException(status_code=502, detail=f"Error connecting to Redis: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error occurred: {e}")
 
 app = FastAPI(lifespan=lifespan)
 

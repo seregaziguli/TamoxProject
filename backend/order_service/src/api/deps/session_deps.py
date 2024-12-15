@@ -1,7 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from ...db.session import async_session_maker
 from typing import AsyncGenerator
-from ...utils.logger import logger
 from fastapi import HTTPException
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
