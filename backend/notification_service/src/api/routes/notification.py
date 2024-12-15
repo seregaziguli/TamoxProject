@@ -20,5 +20,5 @@ async def get_notifications_by_user_id(
     try:
         return await notification_service.get_user_notifications(user_id)
     except Exception as e:
-        logger.error(f"Error fetching notifications for user_id={user_id}: {e}")
+        logger.error(f"Error fetching notifications for user_id={user_id}: {str(e)}")
         raise HTTPException(status_code=500, detail="Could not fetch notifications")

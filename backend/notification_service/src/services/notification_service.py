@@ -3,7 +3,7 @@ from ..repositories.notification_repository import NotificationRepository
 from ..models.notification import Notification
 from typing import List
 from ..api.schemas.notification import NotificationResponseDTO
-from ..utils.logger import logger
+from fastapi import HTTPException
 import json
 
 class NotificationService:
@@ -17,8 +17,10 @@ class NotificationService:
             "executor_id": executor_id,
             "message": message,
         }
-
-        return await self.notification_repository.create_notification(notification_data)
+        try:
+            return await self.notification_repository.create_notification(notification_data)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error creating notification: {str(e)}")
 
     async def get_user_notifications(self, user_id: int) -> List[NotificationResponseDTO]:
         try:
@@ -33,21 +35,21 @@ class NotificationService:
                 for notification in notifications
             ]
         except Exception as e:
-            logger.error(f"Error in get_user_notifications service: {e}")
-            raise
+            raise HTTPException(status_code=500, detail=f"Error fetching notifications for user_id={user_id}: {str(e)}")
 
     async def process_notifications(self, rabbitmq_url: str):
-        connection = await get_rabbitmq_connection(rabbitmq_url)
-        async with connection:
-            channel = await connection.channel()
-            queue = await channel.declare_queue("notifications", durable=True)
+        try:
+            connection = await get_rabbitmq_connection(rabbitmq_url)
+            async with connection:
+                channel = await connection.channel()
+                queue = await channel.declare_queue("notifications", durable=True)
 
-            async for message in queue:
-                async with message.process():
-                    try:
-                        notification_data = json.loads(message.body)
-                        await self.notification_repository.create_notification(notification_data)
-                        logger.info(f"Processed notification: {notification_data}")
-                    except Exception as e:
-                        logger.error(f"Error processing message: {e}")
-
+                async for message in queue:
+                    async with message.process():
+                        try:
+                            notification_data = json.loads(message.body)
+                            await self.notification_repository.create_notification(notification_data)
+                        except Exception as e:
+                            raise HTTPException(status_code=500, detail=f"Error processing message: {str(e)}")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error connecting to RabbitMQ: {str(e)}")

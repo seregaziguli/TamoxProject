@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from ...api.deps.session import get_async_session
+from .session_deps import get_async_session
 from ...repositories.chat_repository import ChatRepository
 from ...services.chat_service import ChatService
 from fastapi import Depends

@@ -5,7 +5,7 @@ from ...main import sio_server
 from ...utils.user import verify_user
 from fastapi import HTTPException
 from ...repositories.chat_repository import ChatRepository
-from ...api.deps.session import get_async_session
+from ..deps.session_deps import get_async_session
 
 active_connections = {}
 
